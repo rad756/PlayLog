@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-var gameFile = filepath.Join("files", "game.cvs")
-var platformFile = filepath.Join("files", "game-type.cvs")
+var gameFile = filepath.Join("files", "game.csv")
+var platformFile = filepath.Join("files", "game-type.csv")
 
 type game struct {
 	name     string
