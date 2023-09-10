@@ -49,6 +49,10 @@ func saveShow(showsList []show) {
 	}
 
 	writer.Flush()
+
+	if serverMode {
+		upload(showFile, serverIP, serverPort)
+	}
 }
 
 func addShowFunc(showName string, showSeason int, showEpisode int, showFinished bool, showsList []show) []show {

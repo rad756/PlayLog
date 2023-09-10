@@ -93,6 +93,10 @@ func saveGame(gamesList []game) {
 	}
 
 	writer.Flush()
+
+	if serverMode {
+		upload(gameFile, serverIP, serverPort)
+	}
 }
 
 func savePlatform(platformList []string) {
@@ -104,6 +108,10 @@ func savePlatform(platformList []string) {
 	}
 
 	writer.Flush()
+
+	if serverMode {
+		upload(platformFile, serverIP, serverPort)
+	}
 }
 
 func orderGamesList(gamesList []game) []game {

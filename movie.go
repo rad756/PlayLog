@@ -93,6 +93,10 @@ func saveMovie(moviesList []movie) {
 	}
 
 	writer.Flush()
+
+	if serverMode {
+		upload(movieFile, serverIP, serverPort)
+	}
 }
 
 func saveGenre(genreList []string) {
@@ -104,6 +108,10 @@ func saveGenre(genreList []string) {
 	}
 
 	writer.Flush()
+
+	if serverMode {
+		upload(platformFile, serverIP, serverPort)
+	}
 }
 
 func orderMoviesList(moviesList []movie) []movie {
