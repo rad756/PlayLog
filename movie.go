@@ -4,12 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 )
 
-var movieFile = "movie.csv"
-var genreFile = "genre.csv"
+var movieFile = filepath.Join("files", "movie.csv")
+var genreFile = filepath.Join("files", "movie-type.csv")
 
 type movie struct {
 	name  string

@@ -4,12 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 )
 
-var showFile = "show.csv"
+var showFile = filepath.Join("files", "show.csv")
 
 type show struct {
 	name     string

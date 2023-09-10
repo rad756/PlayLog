@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -14,6 +15,7 @@ var a = app.New()
 var mainWin = a.NewWindow("PlayLog")
 
 func main() {
+	ini()
 	mainWin.Resize(fyne.NewSize(600, 400))
 	icon, _ := fyne.LoadResourceFromPath("Icon.png")
 
@@ -34,4 +36,11 @@ func main() {
 // checks if string contains a comma
 func noComma(s string) bool {
 	return !strings.Contains(s, ",")
+}
+
+func ini() {
+	//checks if dir files exists, if not creates it
+	if _, err := os.Stat("files"); os.IsNotExist(err) {
+		os.Mkdir("files", 0777)
+	}
 }

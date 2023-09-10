@@ -4,12 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 )
 
-var gameFile = "game.csv"
-var platformFile = "platform.csv"
+var gameFile = filepath.Join("files", "game.cvs")
+var platformFile = filepath.Join("files", "game-type.cvs")
 
 type game struct {
 	name     string
