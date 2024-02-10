@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"net"
 	"os"
 
 	"fyne.io/fyne/v2"
@@ -10,24 +11,23 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func setupui() fyne.CanvasObject {
+func loadSetupUI() fyne.CanvasObject {
 	questionLbl := widget.NewLabel("Select which mode app will run in, Local or Server Sync")
 	localBtn := widget.NewButton("Local Setup", func() { localSetup() })
 
-	serverIpLbl := widget.NewLabel("Enter Server IP Address below MANDITORY FOR SERVER SYNC")
+	serverIpLbl := widget.NewLabel("Enter Server IP Address")
 	serverIpEnt := widget.NewEntry()
 	serverIpEnt.SetPlaceHolder("Enter Server IP")
 	serverPortLbl := widget.NewLabel("Enter Server Port below")
 	serverPortEnt := widget.NewEntry()
 	serverPortEnt.SetPlaceHolder("Default is 7529")
 	serverBtn := widget.NewButton("Server Sync", func() {
-		if serverIpEnt.Text != "" {
+		if net.ParseIP(serverIpEnt.Text) != nil { //checks for valid ip
 			serverSetup(serverIpEnt.Text, serverPortEnt.Text)
 		}
 	})
-	infoLbl := widget.NewLabel("After selection app will close, opening the app again will open in chosen mode")
 
-	return container.New(layout.NewVBoxLayout(), questionLbl, localBtn, serverIpLbl, serverIpEnt, serverPortLbl, serverPortEnt, serverBtn, infoLbl)
+	return container.New(layout.NewVBoxLayout(), questionLbl, localBtn, serverIpLbl, serverIpEnt, serverPortLbl, serverPortEnt, serverBtn)
 }
 
 func localSetup() {
@@ -46,7 +46,7 @@ func localSetup() {
 		writer.Flush()
 	}
 
-	os.Exit(1)
+	mainWin.SetContent(loadMainMenuUI())
 }
 
 func serverSetup(ip string, port string) {
@@ -69,5 +69,5 @@ func serverSetup(ip string, port string) {
 		writer.Flush()
 
 	}
-	os.Exit(1)
+	mainWin.SetContent(loadMainMenuUI())
 }

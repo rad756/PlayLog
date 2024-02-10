@@ -15,6 +15,10 @@ func upload(filePath string, ip string, port string) {
 	var buf bytes.Buffer
 	url := "http://" + ip + ":" + port + "/upload"
 
+	if ip == "" {
+		showError("No server IP configured")
+	}
+
 	// Create a new multipart writer with the buffer
 	w := multipart.NewWriter(&buf)
 
@@ -63,7 +67,7 @@ func download(fileName string, ip string, port string) {
 
 	resp, err := http.Get(uri)
 	if err != nil {
-		showError("Cannot find server " + ip)
+		showError("Cannot find server with IP: " + ip)
 		panic(err)
 	}
 	defer resp.Body.Close()

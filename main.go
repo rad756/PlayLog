@@ -14,7 +14,7 @@ import (
 var splitOffset = 0.6
 var a = app.New()
 var mainWin = a.NewWindow("PlayLog")
-var firstRun bool //default false
+var firstRun bool // default false
 var serverMode = true
 var serverIP string
 var serverPort string
@@ -26,16 +26,9 @@ func main() {
 	var content fyne.CanvasObject
 
 	if firstRun {
-		content = setupui()
+		content = loadSetupUI()
 	} else {
-		gameTab := makeGameTab()
-		movieTab := makeMovieTab()
-		showTab := makeShowTab()
-
-		content = container.NewAppTabs(
-			container.NewTabItem("Games", gameTab),
-			container.NewTabItem("Movies", movieTab),
-			container.NewTabItem("Shows", showTab))
+		content = loadMainMenuUI()
 	}
 
 	mainWin.SetContent(content)
@@ -89,4 +82,17 @@ func ini() {
 			download(v, serverIP, serverPort)
 		}
 	}
+}
+
+func loadMainMenuUI() fyne.CanvasObject {
+	gameTab := makeGameTab()
+	movieTab := makeMovieTab()
+	showTab := makeShowTab()
+
+	content := container.NewAppTabs(
+		container.NewTabItem("Games", gameTab),
+		container.NewTabItem("Movies", movieTab),
+		container.NewTabItem("Shows", showTab))
+
+	return content
 }
