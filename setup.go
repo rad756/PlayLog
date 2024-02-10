@@ -20,7 +20,11 @@ func setupui() fyne.CanvasObject {
 	serverPortLbl := widget.NewLabel("Enter Server Port below")
 	serverPortEnt := widget.NewEntry()
 	serverPortEnt.SetPlaceHolder("Default is 7529")
-	serverBtn := widget.NewButton("Server Sync", func() { serverSetup(serverIpEnt.Text, serverPortEnt.Text) })
+	serverBtn := widget.NewButton("Server Sync", func() {
+		if serverIpEnt.Text != "" {
+			serverSetup(serverIpEnt.Text, serverPortEnt.Text)
+		}
+	})
 	infoLbl := widget.NewLabel("After selection app will close, opening the app again will open in chosen mode")
 
 	return container.New(layout.NewVBoxLayout(), questionLbl, localBtn, serverIpLbl, serverIpEnt, serverPortLbl, serverPortEnt, serverBtn, infoLbl)
@@ -36,8 +40,8 @@ func localSetup() {
 		writer := bufio.NewWriter(file)
 
 		writer.WriteString("mode,local\n")
-		writer.WriteString("ip,198.51.100.1\n")
-		writer.WriteString("port,7529\n")
+		writer.WriteString("ip,\n")
+		writer.WriteString("port,\n")
 
 		writer.Flush()
 	}

@@ -54,7 +54,6 @@ func ini() {
 		os.Mkdir("files", 0777)
 	}
 	if _, err := os.Stat("conf.csv"); os.IsNotExist(err) {
-		os.Create("conf.csv")
 		firstRun = true
 	} else {
 		file, err := os.Open("conf.csv")

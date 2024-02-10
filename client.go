@@ -57,8 +57,13 @@ func upload(filePath string, ip string, port string) {
 func download(fileName string, ip string, port string) {
 	uri := "http://" + ip + ":" + port + "/" + fileName
 
+	if ip == "" {
+		showError("No server IP configured")
+	}
+
 	resp, err := http.Get(uri)
 	if err != nil {
+		showError("Cannot find server " + ip)
 		panic(err)
 	}
 	defer resp.Body.Close()
