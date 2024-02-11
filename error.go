@@ -17,9 +17,9 @@ func showError(errorText string) {
 	topLbl := widget.NewLabel("-- Error(s) --")
 	topContent := container.New(layout.NewCenterLayout(), topLbl)
 	errorLbl := widget.NewLabel(errorText)
-	quitBtn := widget.NewButton("OK", func() { errorPpu.Hide() })
+	backBtn := widget.NewButton("OK", func() { errorPpu.Hide() })
 
-	content := container.New(layout.NewVBoxLayout(), topContent, errorLbl, quitBtn)
+	content := container.New(layout.NewVBoxLayout(), topContent, errorLbl, backBtn)
 
 	errorPpu = widget.NewModalPopUp(content, mainWin.Canvas())
 	errorPpu.Show()
@@ -58,7 +58,7 @@ func showServerInaccessibleError() {
 		if changeIPEnt.Text == "" {
 			showError("IP empty")
 		} else if net.ParseIP(changeIPEnt.Text) == nil {
-			showError(changeIPEnt.Text + " is invalid IP")
+			showError(changeIPEnt.Text + " is not valid IP")
 		} else if !isServerAccessible("http://" + changeIPEnt.Text + ":" + changePortEnt.Text) {
 			showError("Server with details: " + changeIPEnt.Text + ":" + port + " is inaccessible")
 		} else {
@@ -80,9 +80,9 @@ func showServerInaccessibleError() {
 		}
 	})
 
-	quitBtn := widget.NewButton("Quit", func() { os.Exit(1) })
+	backBtn := widget.NewButton("OK", func() { errorPpu.Hide() })
 
-	content := container.New(layout.NewVBoxLayout(), errorLbl, changeLbl, changeIPEnt, changePortEnt, changeServerBtn, quitBtn)
+	content := container.New(layout.NewVBoxLayout(), errorLbl, changeLbl, changeIPEnt, changePortEnt, changeServerBtn, backBtn)
 
 	errorPpu = widget.NewModalPopUp(content, mainWin.Canvas())
 	errorPpu.Show()
