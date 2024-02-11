@@ -19,7 +19,10 @@ func showError(errorText string) {
 }
 
 func displayError(content *fyne.Container) {
-	mainWin.SetContent(content)
+	//mainWin.SetContent(content)
+
+	errorPpu := widget.NewModalPopUp(content, mainWin.Canvas())
+	errorPpu.Show()
 }
 
 func startUpError(errorText string) fyne.CanvasObject {

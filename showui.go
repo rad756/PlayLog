@@ -77,7 +77,9 @@ func makeShowTab() fyne.CanvasObject {
 
 	showAddBtn := widget.NewButton("Add Show", func() {
 
-		if showNameEnt.Text != "" && isNum(showSeasonEnt.Text) && isNum(showEpisodeEnt.Text) && noComma(showNameEnt.Text) {
+		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+			showError("Server with IP " + serverIP + " is inaccessible")
+		} else if showNameEnt.Text != "" && isNum(showSeasonEnt.Text) && isNum(showEpisodeEnt.Text) && noComma(showNameEnt.Text) {
 			seasonNum, _ := strconv.Atoi(showSeasonEnt.Text)
 			episodeNum, _ := strconv.Atoi(showEpisodeEnt.Text)
 
@@ -94,7 +96,9 @@ func makeShowTab() fyne.CanvasObject {
 
 	})
 	showChangeBtn := widget.NewButton("Change Selected Show", func() {
-		if showNameEnt.Text != "" && isNum(showSeasonEnt.Text) && isNum(showEpisodeEnt.Text) && selShowId != -1 && noComma(showNameEnt.Text) {
+		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+			showError("Server with IP " + serverIP + " is inaccessible")
+		} else if showNameEnt.Text != "" && isNum(showSeasonEnt.Text) && isNum(showEpisodeEnt.Text) && selShowId != -1 && noComma(showNameEnt.Text) {
 			seasonNum, _ := strconv.Atoi(showSeasonEnt.Text)
 			episodeNum, _ := strconv.Atoi(showEpisodeEnt.Text)
 
@@ -117,7 +121,9 @@ func makeShowTab() fyne.CanvasObject {
 	centeredShowFinishedlbl := container.New(layout.NewCenterLayout(), showFinishedLbl)
 
 	showDeleteBtn := widget.NewButton("Delete Selected Show", func() {
-		if selShowId != -1 {
+		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+			showError("Server with IP " + serverIP + " is inaccessible")
+		} else if selShowId != -1 {
 			showsList = deleteShowFunc(selShowId, showsList)
 
 			showWatchingLbl.Text = "Currently watching " + countWatching(showsList) + " shows"

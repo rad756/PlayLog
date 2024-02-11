@@ -33,7 +33,9 @@ func makeMovieTab() fyne.CanvasObject {
 	movieGenreDdl.PlaceHolder = "Select Genre"
 
 	movieAddBtn := widget.NewButton("Add Movie", func() {
-		if movieNameEnt.Text != "" && movieGenreDdl.Selected != "" && noComma(movieNameEnt.Text) {
+		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+			showError("Server with IP " + serverIP + " is inaccessible")
+		} else if movieNameEnt.Text != "" && movieGenreDdl.Selected != "" && noComma(movieNameEnt.Text) {
 			moviesList = addMovieFunc(movieNameEnt.Text, movieGenreDdl.Selected, moviesList)
 			saveMovie(moviesList)
 			movieFinishedLbl.SetText(strconv.Itoa(len(moviesList)) + " Movies Watched")
@@ -45,7 +47,9 @@ func makeMovieTab() fyne.CanvasObject {
 	})
 
 	movieChangeBtn := widget.NewButton("Change Selected Movie", func() {
-		if movieNameEnt.Text != "" && movieGenreDdl.Selected != "" && selMovieId != -1 && noComma(movieNameEnt.Text) {
+		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+			showError("Server with IP " + serverIP + " is inaccessible")
+		} else if movieNameEnt.Text != "" && movieGenreDdl.Selected != "" && selMovieId != -1 && noComma(movieNameEnt.Text) {
 			moviesList = deleteMovieFunc(selMovieId, moviesList)
 			moviesList = addMovieFunc(movieNameEnt.Text, movieGenreDdl.Selected, moviesList)
 			saveMovie(moviesList)
@@ -62,7 +66,9 @@ func makeMovieTab() fyne.CanvasObject {
 		genreEnt := widget.NewEntry()
 		genreEnt.SetPlaceHolder("Enter name of genre")
 		genreAddBtn := widget.NewButton("Add Platform", func() {
-			if genreEnt.Text != "" && noComma(genreEnt.Text) {
+			if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+				showError("Server with IP " + serverIP + " is inaccessible")
+			} else if genreEnt.Text != "" && noComma(genreEnt.Text) {
 				genreList = addGenreFunc(genreEnt.Text, genreList)
 				saveGenre(genreList)
 				movieGenreDdl.Options = genreList
@@ -73,11 +79,15 @@ func makeMovieTab() fyne.CanvasObject {
 
 		genreDdl = widget.NewSelect(genreList, nil)
 		genreDeleteBtn := widget.NewButton("Delete Selected Genre", func() {
-			genreList = deleteGenreFunc(genreDdl.SelectedIndex(), genreList)
-			saveGenre(genreList)
-			genreDdl.Options = genreList
-			movieGenreDdl.Options = genreList
-			genreDdl.ClearSelected()
+			if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+				showError("Server with IP " + serverIP + " is inaccessible")
+			} else {
+				genreList = deleteGenreFunc(genreDdl.SelectedIndex(), genreList)
+				saveGenre(genreList)
+				genreDdl.Options = genreList
+				movieGenreDdl.Options = genreList
+				genreDdl.ClearSelected()
+			}
 		})
 
 		exitBtn := widget.NewButton("Exit", func() {
@@ -93,7 +103,9 @@ func makeMovieTab() fyne.CanvasObject {
 	centeredMovieFinishedLbl := container.New(layout.NewCenterLayout(), movieFinishedLbl)
 
 	movieDeleteBtn := widget.NewButton("Delete Selected Movie", func() {
-		if selMovieId != -1 {
+		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+			showError("Server with IP " + serverIP + " is inaccessible")
+		} else if selMovieId != -1 {
 			moviesList = deleteMovieFunc(selMovieId, moviesList)
 			saveMovie(moviesList)
 			selMovieId = -1
