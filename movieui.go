@@ -34,7 +34,7 @@ func makeMovieTab() fyne.CanvasObject {
 
 	movieAddBtn := widget.NewButton("Add Movie", func() {
 		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
-			showError("Server with IP " + serverIP + " is inaccessible")
+			showServerInaccessibleError()
 		} else if movieNameEnt.Text != "" && movieGenreDdl.Selected != "" && noComma(movieNameEnt.Text) {
 			moviesList = addMovieFunc(movieNameEnt.Text, movieGenreDdl.Selected, moviesList)
 			saveMovie(moviesList)
@@ -48,7 +48,7 @@ func makeMovieTab() fyne.CanvasObject {
 
 	movieChangeBtn := widget.NewButton("Change Selected Movie", func() {
 		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
-			showError("Server with IP " + serverIP + " is inaccessible")
+			showServerInaccessibleError()
 		} else if movieNameEnt.Text != "" && movieGenreDdl.Selected != "" && selMovieId != -1 && noComma(movieNameEnt.Text) {
 			moviesList = deleteMovieFunc(selMovieId, moviesList)
 			moviesList = addMovieFunc(movieNameEnt.Text, movieGenreDdl.Selected, moviesList)
@@ -67,7 +67,7 @@ func makeMovieTab() fyne.CanvasObject {
 		genreEnt.SetPlaceHolder("Enter name of genre")
 		genreAddBtn := widget.NewButton("Add Platform", func() {
 			if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
-				showError("Server with IP " + serverIP + " is inaccessible")
+				showServerInaccessibleError()
 			} else if genreEnt.Text != "" && noComma(genreEnt.Text) {
 				genreList = addGenreFunc(genreEnt.Text, genreList)
 				saveGenre(genreList)
@@ -80,7 +80,7 @@ func makeMovieTab() fyne.CanvasObject {
 		genreDdl = widget.NewSelect(genreList, nil)
 		genreDeleteBtn := widget.NewButton("Delete Selected Genre", func() {
 			if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
-				showError("Server with IP " + serverIP + " is inaccessible")
+				showServerInaccessibleError()
 			} else {
 				genreList = deleteGenreFunc(genreDdl.SelectedIndex(), genreList)
 				saveGenre(genreList)
@@ -104,7 +104,7 @@ func makeMovieTab() fyne.CanvasObject {
 
 	movieDeleteBtn := widget.NewButton("Delete Selected Movie", func() {
 		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
-			showError("Server with IP " + serverIP + " is inaccessible")
+			showServerInaccessibleError()
 		} else if selMovieId != -1 {
 			moviesList = deleteMovieFunc(selMovieId, moviesList)
 			saveMovie(moviesList)

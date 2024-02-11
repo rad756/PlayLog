@@ -34,7 +34,7 @@ func makeGameTab() fyne.CanvasObject {
 
 	gameAddBtn := widget.NewButton("Add Game", func() {
 		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
-			showError("Server with IP " + serverIP + " is inaccessible")
+			showServerInaccessibleError()
 		} else if gameNameEnt.Text != "" && gamePlatformDdl.Selected != "" && noComma(gameNameEnt.Text) {
 			gamesList = addGameFunc(gameNameEnt.Text, gamePlatformDdl.Selected, gamesList)
 			saveGame(gamesList)
@@ -48,7 +48,7 @@ func makeGameTab() fyne.CanvasObject {
 
 	gameChangeBtn := widget.NewButton("Change Selected Game", func() {
 		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
-			showError("Server with IP " + serverIP + " is inaccessible")
+			showServerInaccessibleError()
 		} else if gameNameEnt.Text != "" && gamePlatformDdl.Selected != "" && selGameId != -1 && noComma(gameNameEnt.Text) {
 			gamesList = deleteGameFunc(selGameId, gamesList)
 			gamesList = addGameFunc(gameNameEnt.Text, gamePlatformDdl.Selected, gamesList)
@@ -67,7 +67,7 @@ func makeGameTab() fyne.CanvasObject {
 		platformEnt.SetPlaceHolder("Enter name of platform")
 		platformAddBtn := widget.NewButton("Add Platform", func() {
 			if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
-				showError("Server with IP " + serverIP + " is inaccessible")
+				showServerInaccessibleError()
 			} else if platformEnt.Text != "" && noComma(platformEnt.Text) {
 				platformList = addPlatformFunc(platformEnt.Text, platformList)
 				savePlatform(platformList)
@@ -80,7 +80,7 @@ func makeGameTab() fyne.CanvasObject {
 		platformDdl = widget.NewSelect(platformList, nil)
 		platformDeleteBtn := widget.NewButton("Delete selected platform", func() {
 			if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
-				showError("Server with IP " + serverIP + " is inaccessible")
+				showServerInaccessibleError()
 			} else {
 				platformList = deletePlatformFunc(platformDdl.SelectedIndex(), platformList)
 				savePlatform(platformList)
@@ -104,7 +104,7 @@ func makeGameTab() fyne.CanvasObject {
 
 	gameDeleteBtn := widget.NewButton("Delete Selected Game", func() {
 		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
-			showError("Server with IP " + serverIP + " is inaccessible")
+			showServerInaccessibleError()
 		} else if selGameId != -1 {
 			gamesList = deleteGameFunc(selGameId, gamesList)
 			saveGame(gamesList)

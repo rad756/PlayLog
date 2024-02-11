@@ -19,8 +19,6 @@ func showError(errorText string) {
 }
 
 func displayError(content *fyne.Container) {
-	//mainWin.SetContent(content)
-
 	errorPpu := widget.NewModalPopUp(content, mainWin.Canvas())
 	errorPpu.Show()
 }
@@ -30,4 +28,13 @@ func startUpError(errorText string) fyne.CanvasObject {
 	quitBtn := widget.NewButton("Quit", func() { os.Exit(1) })
 
 	return container.New(layout.NewVBoxLayout(), errorLbl, quitBtn)
+}
+
+func showServerInaccessibleError() {
+	errorLbl := widget.NewLabel("Server with IP " + serverIP + " is inaccessible")
+	quitBtn := widget.NewButton("Quit", func() { os.Exit(1) })
+
+	content := container.New(layout.NewVBoxLayout(), errorLbl, quitBtn)
+
+	displayError(content)
 }
