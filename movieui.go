@@ -2,6 +2,7 @@ package main
 
 import (
 	"strconv"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -33,9 +34,22 @@ func makeMovieTab() fyne.CanvasObject {
 	movieGenreDdl.PlaceHolder = "Select Genre"
 
 	movieAddBtn := widget.NewButton("Add Movie", func() {
-		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+		var err = []string{}
+		if movieNameEnt.Text == "" {
+			err = append(err, "Movie name empty")
+		}
+		if movieGenreDdl.Selected == "" {
+			err = append(err, "Genre empty - You can add genres by pressing Change Genres button")
+		}
+		if hasComma(movieNameEnt.Text) {
+			err = append(err, "Movie name cannot contain commas")
+		}
+
+		if len(err) != 0 {
+			showError(strings.Join(err[:], "\n\n"))
+		} else if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
 			showServerInaccessibleError()
-		} else if movieNameEnt.Text != "" && movieGenreDdl.Selected != "" && noComma(movieNameEnt.Text) {
+		} else {
 			moviesList = addMovieFunc(movieNameEnt.Text, movieGenreDdl.Selected, moviesList)
 			saveMovie(moviesList)
 			movieFinishedLbl.SetText(strconv.Itoa(len(moviesList)) + " Movies Watched")
@@ -47,9 +61,22 @@ func makeMovieTab() fyne.CanvasObject {
 	})
 
 	movieChangeBtn := widget.NewButton("Change Selected Movie", func() {
-		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+		var err = []string{}
+		if movieNameEnt.Text == "" {
+			err = append(err, "Movie name empty")
+		}
+		if hasComma(movieNameEnt.Text) {
+			err = append(err, "Movie name cannot contain commas")
+		}
+		if selMovieId == -1 {
+			err = append(err, "No movie was selected to delete")
+		}
+
+		if len(err) != 0 {
+			showError(strings.Join(err[:], "\n\n"))
+		} else if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
 			showServerInaccessibleError()
-		} else if movieNameEnt.Text != "" && movieGenreDdl.Selected != "" && selMovieId != -1 && noComma(movieNameEnt.Text) {
+		} else {
 			moviesList = deleteMovieFunc(selMovieId, moviesList)
 			moviesList = addMovieFunc(movieNameEnt.Text, movieGenreDdl.Selected, moviesList)
 			saveMovie(moviesList)
@@ -66,9 +93,19 @@ func makeMovieTab() fyne.CanvasObject {
 		genreEnt := widget.NewEntry()
 		genreEnt.SetPlaceHolder("Enter name of genre")
 		genreAddBtn := widget.NewButton("Add Platform", func() {
-			if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+			var err = []string{}
+			if genreEnt.Text == "" {
+				err = append(err, "Genre name empty")
+			}
+			if hasComma(genreEnt.Text) {
+				err = append(err, "Genre name cannot contain commas")
+			}
+
+			if len(err) != 0 {
+				showError(strings.Join(err[:], "\n\n"))
+			} else if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
 				showServerInaccessibleError()
-			} else if genreEnt.Text != "" && noComma(genreEnt.Text) {
+			} else {
 				genreList = addGenreFunc(genreEnt.Text, genreList)
 				saveGenre(genreList)
 				movieGenreDdl.Options = genreList
@@ -79,7 +116,9 @@ func makeMovieTab() fyne.CanvasObject {
 
 		genreDdl = widget.NewSelect(genreList, nil)
 		genreDeleteBtn := widget.NewButton("Delete Selected Genre", func() {
-			if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+			if genreDdl.SelectedIndex() == -1 {
+				showError("Select genre to delete")
+			} else if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
 				showServerInaccessibleError()
 			} else {
 				genreList = deleteGenreFunc(genreDdl.SelectedIndex(), genreList)
@@ -103,9 +142,11 @@ func makeMovieTab() fyne.CanvasObject {
 	centeredMovieFinishedLbl := container.New(layout.NewCenterLayout(), movieFinishedLbl)
 
 	movieDeleteBtn := widget.NewButton("Delete Selected Movie", func() {
-		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+		if selMovieId == -1 {
+			showError("No movie selected to delete")
+		} else if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
 			showServerInaccessibleError()
-		} else if selMovieId != -1 {
+		} else {
 			moviesList = deleteMovieFunc(selMovieId, moviesList)
 			saveMovie(moviesList)
 			selMovieId = -1

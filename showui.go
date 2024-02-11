@@ -2,6 +2,7 @@ package main
 
 import (
 	"strconv"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -76,10 +77,25 @@ func makeShowTab() fyne.CanvasObject {
 	centeredShowFinishedCck := container.New(layout.NewCenterLayout(), showFinishedCck)
 
 	showAddBtn := widget.NewButton("Add Show", func() {
+		var err = []string{}
+		if showNameEnt.Text == "" {
+			err = append(err, "Show name empty")
+		}
+		if hasComma(showNameEnt.Text) {
+			err = append(err, "Show name cannot contain commas")
+		}
+		if !isNum(showSeasonEnt.Text) {
+			err = append(err, "Show season must contain a number")
+		}
+		if !isNum(showEpisodeEnt.Text) {
+			err = append(err, "Show episode must contain a number")
+		}
 
-		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+		if len(err) != 0 {
+			showError(strings.Join(err[:], "\n\n"))
+		} else if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
 			showServerInaccessibleError()
-		} else if showNameEnt.Text != "" && isNum(showSeasonEnt.Text) && isNum(showEpisodeEnt.Text) && noComma(showNameEnt.Text) {
+		} else {
 			seasonNum, _ := strconv.Atoi(showSeasonEnt.Text)
 			episodeNum, _ := strconv.Atoi(showEpisodeEnt.Text)
 
@@ -96,9 +112,28 @@ func makeShowTab() fyne.CanvasObject {
 
 	})
 	showChangeBtn := widget.NewButton("Change Selected Show", func() {
-		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+		var err = []string{}
+		if showNameEnt.Text == "" {
+			err = append(err, "Show name empty")
+		}
+		if hasComma(showNameEnt.Text) {
+			err = append(err, "Show name cannot contain commas")
+		}
+		if !isNum(showSeasonEnt.Text) {
+			err = append(err, "Show season must contain a number")
+		}
+		if !isNum(showEpisodeEnt.Text) {
+			err = append(err, "Show episode must contain a number")
+		}
+		if selShowId == -1 {
+			err = append(err, "No show selected to change")
+		}
+
+		if len(err) != 0 {
+			showError(strings.Join(err[:], "\n\n"))
+		} else if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
 			showServerInaccessibleError()
-		} else if showNameEnt.Text != "" && isNum(showSeasonEnt.Text) && isNum(showEpisodeEnt.Text) && selShowId != -1 && noComma(showNameEnt.Text) {
+		} else {
 			seasonNum, _ := strconv.Atoi(showSeasonEnt.Text)
 			episodeNum, _ := strconv.Atoi(showEpisodeEnt.Text)
 
@@ -121,9 +156,11 @@ func makeShowTab() fyne.CanvasObject {
 	centeredShowFinishedlbl := container.New(layout.NewCenterLayout(), showFinishedLbl)
 
 	showDeleteBtn := widget.NewButton("Delete Selected Show", func() {
-		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+		if selShowId == -1 {
+			showError("No show selected to delete")
+		} else if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
 			showServerInaccessibleError()
-		} else if selShowId != -1 {
+		} else {
 			showsList = deleteShowFunc(selShowId, showsList)
 
 			showWatchingLbl.Text = "Currently watching " + countWatching(showsList) + " shows"

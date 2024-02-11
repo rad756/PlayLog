@@ -2,6 +2,7 @@ package main
 
 import (
 	"strconv"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -33,9 +34,22 @@ func makeGameTab() fyne.CanvasObject {
 	gamePlatformDdl.PlaceHolder = "Select Platform"
 
 	gameAddBtn := widget.NewButton("Add Game", func() {
-		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+		var err = []string{}
+		if gameNameEnt.Text == "" {
+			err = append(err, "Game name empty")
+		}
+		if gamePlatformDdl.Selected == "" {
+			err = append(err, "Platform empty - you can add by pressing Change Platforms button")
+		}
+		if hasComma(gameNameEnt.Text) {
+			err = append(err, "Game name cannot contain commas")
+		}
+
+		if len(err) != 0 {
+			showError(strings.Join(err[:], "\n\n"))
+		} else if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
 			showServerInaccessibleError()
-		} else if gameNameEnt.Text != "" && gamePlatformDdl.Selected != "" && noComma(gameNameEnt.Text) {
+		} else {
 			gamesList = addGameFunc(gameNameEnt.Text, gamePlatformDdl.Selected, gamesList)
 			saveGame(gamesList)
 			gameFinishedLbl.SetText(strconv.Itoa(len(gamesList)) + " Games Finished")
@@ -47,9 +61,22 @@ func makeGameTab() fyne.CanvasObject {
 	})
 
 	gameChangeBtn := widget.NewButton("Change Selected Game", func() {
-		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+		var err = []string{}
+		if gameNameEnt.Text == "" {
+			err = append(err, "Game name empty")
+		}
+		if selGameId == -1 {
+			err = append(err, "No game was selected to delete")
+		}
+		if hasComma(gameNameEnt.Text) {
+			err = append(err, "Game name cannot contain commas")
+		}
+
+		if len(err) != 0 {
+			showError(strings.Join(err[:], "\n\n"))
+		} else if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
 			showServerInaccessibleError()
-		} else if gameNameEnt.Text != "" && gamePlatformDdl.Selected != "" && selGameId != -1 && noComma(gameNameEnt.Text) {
+		} else {
 			gamesList = deleteGameFunc(selGameId, gamesList)
 			gamesList = addGameFunc(gameNameEnt.Text, gamePlatformDdl.Selected, gamesList)
 			saveGame(gamesList)
@@ -66,9 +93,19 @@ func makeGameTab() fyne.CanvasObject {
 		platformEnt := widget.NewEntry()
 		platformEnt.SetPlaceHolder("Enter name of platform")
 		platformAddBtn := widget.NewButton("Add Platform", func() {
-			if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+			var err = []string{}
+			if platformEnt.Text == "" {
+				err = append(err, "Platform name missing")
+			}
+			if hasComma(platformEnt.Text) {
+				err = append(err, "Platform name cannot contain a comma")
+			}
+
+			if len(err) != 0 {
+				showError(strings.Join(err[:], "\n\n"))
+			} else if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
 				showServerInaccessibleError()
-			} else if platformEnt.Text != "" && noComma(platformEnt.Text) {
+			} else {
 				platformList = addPlatformFunc(platformEnt.Text, platformList)
 				savePlatform(platformList)
 				gamePlatformDdl.Options = platformList
@@ -79,7 +116,9 @@ func makeGameTab() fyne.CanvasObject {
 
 		platformDdl = widget.NewSelect(platformList, nil)
 		platformDeleteBtn := widget.NewButton("Delete selected platform", func() {
-			if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+			if platformDdl.SelectedIndex() == -1 {
+				showError("Select platform to delete")
+			} else if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
 				showServerInaccessibleError()
 			} else {
 				platformList = deletePlatformFunc(platformDdl.SelectedIndex(), platformList)
@@ -103,9 +142,11 @@ func makeGameTab() fyne.CanvasObject {
 	centeredGameFinishedLbl := container.New(layout.NewCenterLayout(), gameFinishedLbl)
 
 	gameDeleteBtn := widget.NewButton("Delete Selected Game", func() {
-		if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+		if selGameId == -1 {
+			showError("No game selected to delete")
+		} else if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
 			showServerInaccessibleError()
-		} else if selGameId != -1 {
+		} else {
 			gamesList = deleteGameFunc(selGameId, gamesList)
 			saveGame(gamesList)
 			selGameId = -1

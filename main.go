@@ -16,11 +16,11 @@ var a = app.New()
 var mainWin = a.NewWindow("PlayLog")
 var firstRun bool // default false
 var serverMode = true
+var serverDownMode = false //if app is in
 var serverIP string
 var serverPort string
 
 func main() {
-	//ini()
 	mainWin.Resize(fyne.NewSize(600, 0))
 	icon, _ := fyne.LoadResourceFromPath("Icon.png")
 	var content fyne.CanvasObject
@@ -33,8 +33,8 @@ func main() {
 }
 
 // checks if string contains a comma
-func noComma(s string) bool {
-	return !strings.Contains(s, ",")
+func hasComma(s string) bool {
+	return strings.Contains(s, ",")
 }
 
 func ini() fyne.CanvasObject {
