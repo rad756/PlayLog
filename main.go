@@ -20,16 +20,12 @@ var serverIP string
 var serverPort string
 
 func main() {
-	ini()
+	//ini()
 	mainWin.Resize(fyne.NewSize(600, 0))
 	icon, _ := fyne.LoadResourceFromPath("Icon.png")
 	var content fyne.CanvasObject
 
-	if firstRun {
-		content = loadSetupUI()
-	} else {
-		content = loadMainMenuUI()
-	}
+	content = ini()
 
 	mainWin.SetContent(content)
 	mainWin.SetIcon(icon)
@@ -41,7 +37,7 @@ func noComma(s string) bool {
 	return !strings.Contains(s, ",")
 }
 
-func ini() {
+func ini() fyne.CanvasObject {
 	//checks if dir files exists, if not creates it
 	if _, err := os.Stat("files"); os.IsNotExist(err) {
 		os.Mkdir("files", 0777)
@@ -75,12 +71,20 @@ func ini() {
 			}
 		}
 	}
-	if serverMode && !firstRun {
+	if serverMode && !firstRun && isServerAccessible("http://"+serverIP+":"+serverPort) {
 		files := []string{"game.csv", "game-type.csv", "movie.csv", "movie-type.csv", "show.csv"}
 
 		for _, v := range files {
 			download(v, serverIP, serverPort)
 		}
+	}
+
+	if firstRun {
+		return loadSetupUI()
+	} else if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
+		return startUpError("Server with IP " + serverIP + " is inaccessible")
+	} else {
+		return loadMainMenuUI()
 	}
 }
 

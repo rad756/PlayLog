@@ -20,5 +20,11 @@ func showError(errorText string) {
 
 func displayError(content *fyne.Container) {
 	mainWin.SetContent(content)
-	mainWin.ShowAndRun()
+}
+
+func startUpError(errorText string) fyne.CanvasObject {
+	errorLbl := widget.NewLabel(errorText)
+	quitBtn := widget.NewButton("Quit", func() { os.Exit(1) })
+
+	return container.New(layout.NewVBoxLayout(), errorLbl, quitBtn)
 }

@@ -14,9 +14,15 @@ func upload(filePath string, ip string, port string) {
 	// Create a buffer to store the request body
 	var buf bytes.Buffer
 	url := "http://" + ip + ":" + port + "/upload"
+	uri := "http://" + ip + ":" + port
 
 	if ip == "" {
 		showError("No server IP configured")
+	}
+
+	if isServerAccessible(uri) == false {
+		showError("Server with " + ip + " inaccessible")
+		return
 	}
 
 	// Create a new multipart writer with the buffer
@@ -65,11 +71,15 @@ func download(fileName string, ip string, port string) {
 		showError("No server IP configured")
 	}
 
+	if isServerAccessible(uri) == false {
+		showError("Server with " + ip + " inaccessible")
+	}
+
 	resp, err := http.Get(uri)
 	if err != nil {
 		showError("Cannot find server with IP: " + ip)
-		panic(err)
 	}
+
 	defer resp.Body.Close()
 
 	data, err := io.ReadAll(resp.Body)
@@ -81,4 +91,14 @@ func download(fileName string, ip string, port string) {
 	if err := os.WriteFile(filePath, data, 0644); err != nil {
 		panic(err)
 	}
+}
+
+func isServerAccessible(uri string) bool {
+	_, err := http.Get(uri)
+
+	if err != nil {
+		return false
+	}
+
+	return true
 }
