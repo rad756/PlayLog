@@ -25,11 +25,6 @@ func showError(errorText string) {
 	errorPpu.Show()
 }
 
-func displayError(content *fyne.Container) {
-	errorPpu := widget.NewModalPopUp(content, mainWin.Canvas())
-	errorPpu.Show()
-}
-
 func startUpError(errorText string) fyne.CanvasObject {
 	errorLbl := widget.NewLabel(errorText)
 	quitBtn := widget.NewButton("Quit", func() { os.Exit(1) })
