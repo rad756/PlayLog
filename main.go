@@ -2,12 +2,16 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
+	"path/filepath"
+	"reflect"
 	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
 )
 
 // variables
@@ -15,17 +19,17 @@ var splitOffset = 0.6
 var a = app.New()
 var mainWin = a.NewWindow("PlayLog")
 var firstRun bool // default false
-var serverMode = true
-var serverDownMode = false //if app is in
+var serverMode bool
+var serverDownMode = false //if app is in offline mode
 var serverIP string
 var serverPort string
 
 func main() {
 	mainWin.Resize(fyne.NewSize(600, 0))
 	icon, _ := fyne.LoadResourceFromPath("Icon.png")
-	var content fyne.CanvasObject
 
-	content = ini()
+	content := ini()
+	serverSync()
 
 	mainWin.SetContent(content)
 	mainWin.SetIcon(icon)
@@ -68,21 +72,25 @@ func ini() fyne.CanvasObject {
 				if s[0] == "port" {
 					serverPort = s[1]
 				}
+				if s[0] == "serverDownMode" {
+					if s[1] == "1" {
+						serverDownMode = true
+					} else {
+						serverDownMode = false
+					}
+				}
 			}
 		}
 	}
-	if serverMode && !firstRun && isServerAccessible("http://"+serverIP+":"+serverPort) {
-		files := []string{"game.csv", "game-type.csv", "movie.csv", "movie-type.csv", "show.csv"}
 
-		for _, v := range files {
-			download(v, serverIP, serverPort)
-		}
-	}
+	serverUP := isServerAccessible("http://" + serverIP + ":" + serverPort)
 
 	if firstRun {
 		return loadSetupUI()
-	} else if serverMode && !isServerAccessible("http://"+serverIP+":"+serverPort) {
-		return startUpError("Server with IP " + serverIP + " is inaccessible")
+	} else if serverMode && !serverUP {
+		return startUpServerError()
+	} else if !serverMode && serverDownMode && serverUP && fileConflictCheck() {
+		return loadSyncUI()
 	} else {
 		return loadMainMenuUI()
 	}
@@ -99,4 +107,73 @@ func loadMainMenuUI() fyne.CanvasObject {
 		container.NewTabItem("Shows", showTab))
 
 	return content
+}
+
+func loadSyncUI() fyne.CanvasObject {
+	errorLbl := widget.NewLabel("-- Sync Error --")
+	errorCentered := container.NewCenter(errorLbl)
+	questionLbl := widget.NewLabel("Do you want to download server files OR upload local files to server?")
+	questionCentered := container.NewCenter(questionLbl)
+
+	serverFilesBtn := widget.NewButton("Download Server Files", func() {
+		downloadFromServer()
+		writeConfig()
+		mainWin.SetContent(loadMainMenuUI())
+	})
+	orLbl := widget.NewLabel("OR")
+	orCentered := container.NewCenter(orLbl)
+	localFilesBtn := widget.NewButton("Upload Local Files", func() {
+		//Does not upload after loads main menu
+		uploadToServer()
+		writeConfig()
+		mainWin.SetContent(loadMainMenuUI())
+	})
+
+	return container.NewVBox(errorCentered, questionCentered, serverFilesBtn, orCentered, localFilesBtn)
+
+}
+
+func serverSync() {
+	serverUP := isServerAccessible("http://" + serverIP + ":" + serverPort)
+
+	if serverDownMode && serverUP {
+		fmt.Println(fileConflictCheck())
+	} else if serverMode && serverUP {
+		downloadFromServer()
+	}
+}
+
+func downloadFromServer() {
+	files := []string{"game.csv", "game-type.csv", "movie.csv", "movie-type.csv", "show.csv"}
+
+	for _, v := range files {
+		download(v, serverIP, serverPort)
+	}
+}
+
+func uploadToServer() {
+	files := []string{"game.csv", "game-type.csv", "movie.csv", "movie-type.csv", "show.csv"}
+
+	for _, v := range files {
+		upload(filepath.Join("files", v), serverIP, serverPort)
+	}
+}
+
+// Checks if local and server files are different, returns true if conflict
+func fileConflictCheck() bool {
+	files := []string{"game.csv", "game-type.csv", "movie.csv", "movie-type.csv", "show.csv"}
+	filesDownloaded := [][]string{}
+	filesRead := [][]string{}
+
+	for _, v := range files {
+		filesDownloaded = append(filesDownloaded, downloadToMemory(v, serverIP, serverPort))
+		//fmt.Println(downloadToMemory(v, serverIP, serverPort))
+		filesRead = append(filesRead, localFileToMemory(v))
+	}
+
+	if reflect.DeepEqual(filesDownloaded, filesRead) {
+		return false
+	} else {
+		return true
+	}
 }

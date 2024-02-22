@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"io"
 	"log"
@@ -8,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func upload(filePath string, ip string, port string) {
@@ -101,4 +103,54 @@ func isServerAccessible(uri string) bool {
 	}
 
 	return true
+}
+
+func downloadToMemory(fileName string, ip string, port string) []string {
+	uri := "http://" + ip + ":" + port + "/" + fileName
+
+	if ip == "" {
+		showError("No server IP configured")
+	}
+
+	if !isServerAccessible(uri) {
+		showError("Server with " + ip + " inaccessible")
+	}
+
+	resp, err := http.Get(uri)
+	if err != nil {
+		showError("Cannot find server with IP: " + ip)
+	}
+
+	defer resp.Body.Close()
+
+	//var buf bytes.Buffer
+
+	scanner := bufio.NewScanner(resp.Body)
+
+	var reply []string
+
+	for scanner.Scan() {
+		s := strings.Split(scanner.Text(), ",")
+		reply = append(reply, s...)
+	}
+
+	return reply
+}
+
+func localFileToMemory(fileName string) []string {
+	data, err := os.Open(filepath.Join("files", fileName))
+	if err != nil {
+		panic(err)
+	}
+
+	scanner := bufio.NewScanner(data)
+
+	var reply []string
+
+	for scanner.Scan() {
+		s := strings.Split(scanner.Text(), ",")
+		reply = append(reply, s...)
+	}
+
+	return reply
 }

@@ -25,11 +25,20 @@ func showError(errorText string) {
 	errorPpu.Show()
 }
 
-func startUpError(errorText string) fyne.CanvasObject {
-	errorLbl := widget.NewLabel(errorText)
-	quitBtn := widget.NewButton("Quit", func() { os.Exit(1) })
+func startUpServerError() fyne.CanvasObject {
+	topLbl := widget.NewLabel("-- Startup Error --")
+	topContent := container.New(layout.NewCenterLayout(), topLbl)
+	errorLbl := widget.NewLabel("Server with IP " + serverIP + " is inaccessible\nThe app will start in Offline Mode and try to sync upon next startup")
+	offlineModeBtn := widget.NewButton("OK", func() {
+		serverDownMode = true
+		serverMode = false
 
-	return container.New(layout.NewVBoxLayout(), errorLbl, quitBtn)
+		writeConfig()
+
+		mainWin.SetContent(loadMainMenuUI())
+	})
+
+	return container.New(layout.NewVBoxLayout(), topContent, errorLbl, offlineModeBtn)
 }
 
 func showServerInaccessibleError() {

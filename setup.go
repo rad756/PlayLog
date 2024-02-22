@@ -42,6 +42,11 @@ func localSetup() {
 		writer.WriteString("mode,local\n")
 		writer.WriteString("ip,\n")
 		writer.WriteString("port,\n")
+		if serverDownMode {
+			writer.WriteString("serverDownMode,1" + "\n")
+		} else {
+			writer.WriteString("serverDownMode,0" + "\n")
+		}
 
 		writer.Flush()
 	}
@@ -65,9 +70,41 @@ func serverSetup(ip string, port string) {
 		writer.WriteString("mode,sync\n")
 		writer.WriteString("ip," + ip + "\n")
 		writer.WriteString("port," + port + "\n")
+		if serverDownMode {
+			writer.WriteString("serverDownMode,1" + "\n")
+		} else {
+			writer.WriteString("serverDownMode,0" + "\n")
+		}
 
 		writer.Flush()
 
 	}
 	mainWin.SetContent(loadMainMenuUI())
+}
+
+func writeConfig() {
+	configFile := "conf.csv"
+	file, err := os.Create(configFile)
+
+	if err != nil {
+		panic(err)
+	} else {
+		writer := bufio.NewWriter(file)
+
+		if serverMode {
+			writer.WriteString("mode,sync\n")
+		} else {
+			writer.WriteString("mode,local\n")
+		}
+		writer.WriteString("ip," + serverIP + "\n")
+		writer.WriteString("port," + serverPort + "\n")
+		if serverDownMode {
+			writer.WriteString("serverDownMode,1" + "\n")
+		} else {
+			writer.WriteString("serverDownMode,0" + "\n")
+		}
+
+		writer.Flush()
+
+	}
 }
