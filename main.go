@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -97,14 +96,27 @@ func ini() fyne.CanvasObject {
 }
 
 func loadMainMenuUI() fyne.CanvasObject {
-	gameTab := makeGameTab()
-	movieTab := makeMovieTab()
-	showTab := makeShowTab()
-
 	content := container.NewAppTabs(
-		container.NewTabItem("Games", gameTab),
-		container.NewTabItem("Movies", movieTab),
-		container.NewTabItem("Shows", showTab))
+		container.NewTabItem("Games", makeGameTab()),
+		container.NewTabItem("Movies", makeMovieTab()),
+		container.NewTabItem("Shows", makeShowTab()),
+		container.NewTabItem("Settings", makeSettingsTab()))
+
+	content.OnSelected = func(ti *container.TabItem) {
+		if ti.Text == "Settings" {
+			var currentMode string
+			if !serverMode && !serverDownMode {
+				currentMode = "Local"
+			} else if serverDownMode {
+				currentMode = "Server Down"
+			} else {
+				currentMode = "Server Sync"
+			}
+			currentModeLbl.SetText("Current Mode: " + currentMode)
+			currentIPLbl.SetText("Current IP: " + serverIP)
+			currentPortLbl.SetText("Current Port: " + serverPort)
+		}
+	}
 
 	return content
 }
@@ -117,6 +129,8 @@ func loadSyncUI() fyne.CanvasObject {
 
 	serverFilesBtn := widget.NewButton("Download Server Files", func() {
 		downloadFromServer()
+		serverMode = true
+		serverDownMode = false
 		writeConfig()
 		mainWin.SetContent(loadMainMenuUI())
 	})
@@ -125,6 +139,8 @@ func loadSyncUI() fyne.CanvasObject {
 	localFilesBtn := widget.NewButton("Upload Local Files", func() {
 		//Does not upload after loads main menu
 		uploadToServer()
+		serverMode = true
+		serverDownMode = false
 		writeConfig()
 		mainWin.SetContent(loadMainMenuUI())
 	})
@@ -137,7 +153,9 @@ func serverSync() {
 	serverUP := isServerAccessible("http://" + serverIP + ":" + serverPort)
 
 	if serverDownMode && serverUP {
-		fmt.Println(fileConflictCheck())
+		if fileConflictCheck() {
+			loadSyncUI()
+		}
 	} else if serverMode && serverUP {
 		downloadFromServer()
 	}

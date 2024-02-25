@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"net"
 	"os"
+	"strconv"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -22,7 +23,20 @@ func loadSetupUI() fyne.CanvasObject {
 	serverPortEnt := widget.NewEntry()
 	serverPortEnt.SetPlaceHolder("Default is 7529")
 	serverBtn := widget.NewButton("Server Sync", func() {
-		if net.ParseIP(serverIpEnt.Text) != nil { //checks for valid ip
+		var port string
+		if serverPortEnt.Text == "" {
+			port = "7529"
+		} else if _, err := strconv.Atoi(serverPortEnt.Text); err == nil {
+			port = serverPortEnt.Text
+		}
+
+		if serverIpEnt.Text == "" {
+			showError("IP empty")
+		} else if net.ParseIP(serverIpEnt.Text) == nil {
+			showError(serverIpEnt.Text + " is not valid IP")
+		} else if !isServerAccessible("http://" + serverIpEnt.Text + ":" + serverPortEnt.Text) {
+			showError("Server with details: " + serverIpEnt.Text + ":" + port + " is inaccessible")
+		} else {
 			serverSetup(serverIpEnt.Text, serverPortEnt.Text)
 		}
 	})
@@ -85,6 +99,10 @@ func serverSetup(ip string, port string) {
 func writeConfig() {
 	configFile := "conf.csv"
 	file, err := os.Create(configFile)
+
+	if serverPort == "" {
+		serverPort = "7529"
+	}
 
 	if err != nil {
 		panic(err)

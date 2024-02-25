@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bufio"
 	"net"
-	"os"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -28,8 +26,8 @@ func showError(errorText string) {
 func startUpServerError() fyne.CanvasObject {
 	topLbl := widget.NewLabel("-- Startup Error --")
 	topContent := container.New(layout.NewCenterLayout(), topLbl)
-	errorLbl := widget.NewLabel("Server with IP " + serverIP + " is inaccessible\nThe app will start in Offline Mode and try to sync upon next startup")
-	offlineModeBtn := widget.NewButton("OK", func() {
+	errorLbl := widget.NewLabel("Server with IP " + serverIP + " is inaccessible\nThe app will start in Server Down Mode and try to sync upon next startup")
+	offlineModeBtn := widget.NewButton("Enter Server Down Mode", func() {
 		serverDownMode = true
 		serverMode = false
 
@@ -50,6 +48,7 @@ func showServerInaccessibleError() {
 	changeIPEnt.PlaceHolder = "Type IP"
 	changePortEnt := widget.NewEntry()
 	changePortEnt.PlaceHolder = "Type Port / default 7529"
+
 	var port string
 
 	if changePortEnt.Text == "" {
@@ -66,27 +65,28 @@ func showServerInaccessibleError() {
 		} else if !isServerAccessible("http://" + changeIPEnt.Text + ":" + changePortEnt.Text) {
 			showError("Server with details: " + changeIPEnt.Text + ":" + port + " is inaccessible")
 		} else {
-			configFile := "conf.csv"
-			file, err := os.Create(configFile)
-
-			if err != nil {
-				panic(err)
-			} else {
-				writer := bufio.NewWriter(file)
-
-				writer.WriteString("mode,sync\n")
-				writer.WriteString("ip," + changeIPEnt.Text + "\n")
-				writer.WriteString("port," + port + "\n")
-
-				writer.Flush()
-
-			}
+			serverMode = true
+			serverDownMode = false
+			serverIP = changeIPEnt.Text
+			serverPort = changePortEnt.Text
+			writeConfig()
 		}
 	})
 
-	backBtn := widget.NewButton("OK", func() { errorPpu.Hide() })
+	orLbl := widget.NewLabel("OR")
+	centeredOrLbl := container.NewCenter(orLbl)
 
-	content := container.New(layout.NewVBoxLayout(), errorLbl, changeLbl, changeIPEnt, changePortEnt, changeServerBtn, backBtn)
+	backBtn := widget.NewButton("Enter Server Down Mode", func() {
+		serverDownMode = true
+		serverMode = false
+
+		writeConfig()
+
+		errorPpu.Hide()
+	})
+	backLbl := widget.NewLabel("Current change will not be pushed.\nTry it again after swithching to Server Down Mode")
+
+	content := container.New(layout.NewVBoxLayout(), errorLbl, changeLbl, changeIPEnt, changePortEnt, changeServerBtn, centeredOrLbl, backBtn, backLbl)
 
 	errorPpu = widget.NewModalPopUp(content, mainWin.Canvas())
 	errorPpu.Show()
