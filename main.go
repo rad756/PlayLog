@@ -44,6 +44,11 @@ func ini() fyne.CanvasObject {
 	//checks if dir files exists, if not creates it
 	if _, err := os.Stat("files"); os.IsNotExist(err) {
 		os.Mkdir("files", 0777)
+		files := []string{"game.csv", "game-type.csv", "movie.csv", "movie-type.csv", "show.csv"}
+
+		for _, v := range files {
+			os.Create(filepath.Join("files", v))
+		}
 	}
 	if _, err := os.Stat("conf.csv"); os.IsNotExist(err) {
 		firstRun = true
