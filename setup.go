@@ -34,7 +34,7 @@ func loadSetupUI() fyne.CanvasObject {
 			showError("IP empty")
 		} else if net.ParseIP(serverIpEnt.Text) == nil {
 			showError(serverIpEnt.Text + " is not valid IP")
-		} else if !isServerAccessible("http://" + serverIpEnt.Text + ":" + serverPortEnt.Text) {
+		} else if !isServerAccessible("http://" + serverIpEnt.Text + ":" + port) {
 			showError("Server with details: " + serverIpEnt.Text + ":" + port + " is inaccessible")
 		} else {
 			serverSetup(serverIpEnt.Text, serverPortEnt.Text)
