@@ -31,19 +31,19 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 			o.(*widget.Label).SetText(fmt.Sprintf("%s - %s", alphaSlice.Slice[i].Name, alphaSlice.Slice[i].Kind))
 		})
 
-	tabNameEnt := widget.NewEntry()
-	tabNameEnt.SetPlaceHolder(fmt.Sprintf("Enter %s Name", tabAlpha.Name))
+	nameEnt := widget.NewEntry()
+	nameEnt.SetPlaceHolder(fmt.Sprintf("Enter %s Name", tabAlpha.Name))
 
-	tabKindSel := widget.NewSelect(kind.Slice, nil)
-	tabKindSel.PlaceHolder = fmt.Sprintf("Select %s", tabAlpha.Kind)
+	kindSel := widget.NewSelect(kind.Slice, nil)
+	kindSel.PlaceHolder = fmt.Sprintf("Select %s", tabAlpha.Kind)
 
 	addBtn := widget.NewButton("Add "+tabAlpha.Name, func() {
 		var err []string
 
-		if tabNameEnt.Text == "" {
+		if nameEnt.Text == "" {
 			err = append(err, fmt.Sprintf("%s name empty", tabAlpha.Name))
 		}
-		if tabKindSel.SelectedIndex() == -1 {
+		if kindSel.SelectedIndex() == -1 {
 			err = append(err, fmt.Sprintf("%s empty", tabAlpha.Kind))
 		}
 
@@ -52,7 +52,7 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 		} else if !logic.IsInSyncModeAndServerAccessible(MyApp) {
 			ShowServerInaccessibleError(MyApp)
 		} else {
-			alphaSlice.AddAlpha(tabNameEnt.Text, tabKindSel.Selected, MyApp, tabAlpha.Name)
+			alphaSlice.AddAlpha(nameEnt.Text, kindSel.Selected, MyApp, tabAlpha.Name)
 			tabAlpha.ID = -1
 			lst.UnselectAll()
 			lst.Refresh()
@@ -64,7 +64,7 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 	changeBtn := widget.NewButton("Change Selected "+tabAlpha.Name, func() {
 		var err = []string{}
 
-		if tabNameEnt.Text == "" {
+		if nameEnt.Text == "" {
 			err = append(err, fmt.Sprintf("%s name empty", tabAlpha.Name))
 		}
 		if tabAlpha.ID == -1 {
@@ -77,7 +77,7 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 			ShowServerInaccessibleError(MyApp)
 		} else {
 			alphaSlice.DeleteAlpha(tabAlpha.ID, MyApp, tabAlpha.Name)
-			alphaSlice.AddAlpha(tabNameEnt.Text, tabKindSel.Selected, MyApp, tabAlpha.Name)
+			alphaSlice.AddAlpha(nameEnt.Text, kindSel.Selected, MyApp, tabAlpha.Name)
 			tabAlpha.ID = -1
 			lst.UnselectAll()
 			lst.Refresh()
@@ -85,7 +85,7 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 		}
 	})
 
-	changeKindBtn := widget.NewButton(fmt.Sprintf("Change %ss", tabAlpha.Kind), func() { makeChangeKindPopUp(MyApp, tabAlpha, kind, tabKindSel) })
+	changeKindBtn := widget.NewButton(fmt.Sprintf("Change %ss", tabAlpha.Kind), func() { makeChangeKindPopUp(MyApp, tabAlpha, kind, kindSel) })
 
 	finishedCountLbl = widget.NewLabel(fmt.Sprintf("%d %ss Finished", len(alphaSlice.Slice), tabAlpha.Name))
 	centeredFinishedCountLbl := container.NewCenter(finishedCountLbl)
@@ -107,18 +107,18 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 	lst.OnSelected = func(id widget.ListItemID) {
 		tabAlpha.ID = id
 
-		tabNameEnt.Text = alphaSlice.Slice[id].Name
-		tabNameEnt.Refresh()
+		nameEnt.Text = alphaSlice.Slice[id].Name
+		nameEnt.Refresh()
 
 		for i := range kind.Slice {
 			if kind.Slice[i] == alphaSlice.Slice[id].Kind {
-				tabKindSel.SetSelectedIndex(i)
+				kindSel.SetSelectedIndex(i)
 				return
 			}
 		}
 	}
 
-	vBox := container.NewVBox(tabNameEnt, tabKindSel, addBtn, layout.NewSpacer(), changeBtn, changeKindBtn, layout.NewSpacer(), centeredFinishedCountLbl, layout.NewSpacer(), deleteBtn)
+	vBox := container.NewVBox(nameEnt, kindSel, addBtn, layout.NewSpacer(), changeBtn, changeKindBtn, layout.NewSpacer(), centeredFinishedCountLbl, layout.NewSpacer(), deleteBtn)
 	tab := container.NewHSplit(lst, vBox)
 	tab.Offset = MyApp.App.Preferences().Float("GlobalOffset")
 
@@ -127,7 +127,7 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 
 func makeChangeKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *widget.Select) {
 	var tabKindPopUp *widget.PopUp
-	var tabKindSel *widget.Select
+	var kindSel *widget.Select
 
 	tabKindEnt := widget.NewEntry()
 	tabKindEnt.SetPlaceHolder(fmt.Sprintf("Enter %s Name", ta.Kind))
@@ -135,19 +135,19 @@ func makeChangeKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *wid
 	addKindBtn := widget.NewButton("Add "+ta.Kind, func() {
 		k.AddKind(tabKindEnt.Text, (ta.Name + "-" + ta.Kind), MyApp)
 
-		tabKindSel.Options = k.Slice
+		kindSel.Options = k.Slice
 		tks.Options = k.Slice
 
 	})
 
-	tabKindSel = widget.NewSelect(k.Slice, nil)
+	kindSel = widget.NewSelect(k.Slice, nil)
 	deleteKindBtn := widget.NewButton("Delete Selected "+ta.Kind, func() {
-		if tabKindSel.SelectedIndex() == -1 {
+		if kindSel.SelectedIndex() == -1 {
 			return
 		} else {
-			k.DeleteKind(tabKindSel.SelectedIndex(), (ta.Name + "-" + ta.Kind), MyApp)
-			tabKindSel.Options = k.Slice
-			tabKindSel.ClearSelected()
+			k.DeleteKind(kindSel.SelectedIndex(), (ta.Name + "-" + ta.Kind), MyApp)
+			kindSel.Options = k.Slice
+			kindSel.ClearSelected()
 			tks.Options = k.Slice
 			tks.ClearSelected()
 
@@ -156,7 +156,7 @@ func makeChangeKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *wid
 
 	exitBtn := widget.NewButton("Exit", func() { tabKindPopUp.Hide() })
 
-	content := container.NewVBox(tabKindEnt, addKindBtn, tabKindSel, deleteKindBtn, layout.NewSpacer(), exitBtn)
+	content := container.NewVBox(tabKindEnt, addKindBtn, kindSel, deleteKindBtn, layout.NewSpacer(), exitBtn)
 
 	tabKindPopUp = widget.NewModalPopUp(content, MyApp.Win.Canvas())
 	tabKindPopUp.Resize(fyne.NewSize(200, 0))
