@@ -31,7 +31,7 @@ func Ini(MyApp *MyApp) {
 func ServerSetup(ip string, port string, mode string, MyApp MyApp) {
 	MyApp.App.Preferences().SetString("IP", ip)
 	MyApp.App.Preferences().SetString("Port", port)
-	MyApp.App.Preferences().SetString("Mode", mode)
+	MyApp.App.Preferences().SetString("StorageMode", mode)
 }
 
 // Checks if local and server files are different, returns true if conflict

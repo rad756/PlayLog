@@ -23,7 +23,7 @@ func IsNum(s string) bool {
 }
 
 func IsInSyncModeAndServerAccessible(MyApp MyApp) bool {
-	if MyApp.App.Preferences().String("Mode") == "Sync" && IsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"))) {
+	if MyApp.App.Preferences().String("StorageMode") == "Sync" && IsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"))) {
 		return true
 	} else {
 		return false

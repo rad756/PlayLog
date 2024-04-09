@@ -16,7 +16,7 @@ import (
 func LoadSetupUI(MyApp logic.MyApp) fyne.CanvasObject {
 	questionLbl := widget.NewLabel("Select which mode app will run in, Local or Server Sync")
 	localBtn := widget.NewButton("Local Setup", func() {
-		MyApp.App.Preferences().SetString("Mode", "Local")
+		MyApp.App.Preferences().SetString("StorageMode", "Local")
 		MyApp.App.Preferences().SetBool("FirstRun", false)
 		MyApp.Win.SetContent(LoadMainUI(MyApp))
 	})

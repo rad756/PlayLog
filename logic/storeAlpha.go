@@ -29,7 +29,7 @@ func SaveAlphaSlice(name string, MyApp MyApp, as AlphaSlice) {
 
 	file.Write(mar)
 
-	if MyApp.App.Preferences().String("Mode") == "Sync" {
+	if MyApp.App.Preferences().String("StorageMode") == "Sync" {
 		Upload(mar, name, MyApp)
 	}
 }
@@ -57,7 +57,7 @@ func SaveAlphaKind(name string, MyApp MyApp, k Kind) {
 
 	file.Write(mar)
 
-	if MyApp.App.Preferences().String("Mode") == "Sync" {
+	if MyApp.App.Preferences().String("StorageMode") == "Sync" {
 		Upload(mar, name, MyApp)
 	}
 }

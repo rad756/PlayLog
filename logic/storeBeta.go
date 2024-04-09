@@ -29,7 +29,7 @@ func SaveBetaSlice(name string, MyApp MyApp, bs BetaSlice) {
 
 	file.Write(mar)
 
-	if MyApp.App.Preferences().String("Mode") == "Sync" {
+	if MyApp.App.Preferences().String("StorageMode") == "Sync" {
 		Upload(mar, name, MyApp)
 	}
 }

@@ -16,7 +16,7 @@ func LoadGUI(MyApp logic.MyApp) fyne.CanvasObject {
 
 	if MyApp.App.Preferences().Bool("FirstRun") {
 		content = LoadSetupUI(MyApp)
-	} else if MyApp.App.Preferences().String("Mode") == "Sync" {
+	} else if MyApp.App.Preferences().String("StorageMode") == "Sync" {
 		if !logic.IsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"))) {
 			content = LoadStartUpServerError(MyApp)
 		} else if logic.FileConflictCheck(MyApp) {
@@ -52,7 +52,7 @@ func LoadStartUpServerError(MyApp logic.MyApp) fyne.CanvasObject {
 	topContent := container.New(layout.NewCenterLayout(), topLbl)
 	errorLbl := widget.NewLabel("Server with IP " + MyApp.App.Preferences().String("IP") + " is inaccessible\nThe app will start in Desync Mode and try to sync upon next startup\nOr you can try to enter Sync Mode by pressing Switch Mode in Settings")
 	desyncModeBtn := widget.NewButton("Enter Desync Mode", func() {
-		MyApp.App.Preferences().SetString("Mode", "Desync")
+		MyApp.App.Preferences().SetString("StorageMode", "Desync")
 
 		MyApp.Win.SetContent(LoadMainUI(MyApp))
 	})
@@ -68,14 +68,14 @@ func LoadSyncUI(MyApp logic.MyApp) fyne.CanvasObject {
 
 	serverFilesBtn := widget.NewButton("Download Server Files", func() {
 		logic.DownloadFromServer(MyApp)
-		MyApp.App.Preferences().SetString("Mode", "Sync")
+		MyApp.App.Preferences().SetString("StorageMode", "Sync")
 		MyApp.Win.SetContent(LoadMainUI(MyApp))
 	})
 	orLbl := widget.NewLabel("OR")
 	orCentered := container.NewCenter(orLbl)
 	localFilesBtn := widget.NewButton("Upload Local Files", func() {
 		logic.UploadToServer(MyApp)
-		MyApp.App.Preferences().SetString("Mode", "Sync")
+		MyApp.App.Preferences().SetString("StorageMode", "Sync")
 		MyApp.Win.SetContent(LoadMainUI(MyApp))
 	})
 
@@ -123,7 +123,7 @@ func ShowServerInaccessibleError(MyApp logic.MyApp) {
 		} else if !logic.IsServerAccessible("http://" + changeIPEnt.Text + ":" + changePortEnt.Text) {
 			ShowError("Server with details: "+changeIPEnt.Text+":"+port+" is inaccessible", MyApp)
 		} else {
-			MyApp.App.Preferences().SetString("Mode", "Sync")
+			MyApp.App.Preferences().SetString("StorageMode", "Sync")
 			MyApp.App.Preferences().SetString("IP", changeIPEnt.Text)
 			MyApp.App.Preferences().SetString("Port", port)
 			errorPpu.Hide()
@@ -134,7 +134,7 @@ func ShowServerInaccessibleError(MyApp logic.MyApp) {
 	centeredOrLbl := container.NewCenter(orLbl)
 
 	backBtn := widget.NewButton("Enter Desync Mode", func() {
-		MyApp.App.Preferences().SetString("Mode", "Desync")
+		MyApp.App.Preferences().SetString("StorageMode", "Desync")
 
 		errorPpu.Hide()
 	})

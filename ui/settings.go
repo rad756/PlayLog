@@ -16,19 +16,19 @@ import (
 func MakeSettingsTab(MyApp logic.MyApp) fyne.CanvasObject {
 	var changeIPEnt *widget.Entry
 	var changePortEnt *widget.Entry
-	ModeBind := binding.BindPreferenceString("Mode", MyApp.App.Preferences())
+	ModeBind := binding.BindPreferenceString("StorageMode", MyApp.App.Preferences())
 
 	currentModeLbl := widget.NewLabelWithData(binding.NewSprintf("Current mode: %s", ModeBind))
 
 	switchModeBtn := widget.NewButton("Switch Mode", func() {
-		if MyApp.App.Preferences().String("Mode") == "Sync" {
-			MyApp.App.Preferences().SetString("Mode", "Local")
+		if MyApp.App.Preferences().String("StorageMode") == "Sync" {
+			MyApp.App.Preferences().SetString("StorageMode", "Local")
 			return
 		}
 
-		if MyApp.App.Preferences().String("Mode") == "Local" && logic.IsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"))) {
+		if MyApp.App.Preferences().String("StorageMode") == "Local" && logic.IsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"))) {
 			if !logic.FileConflictCheck(MyApp) {
-				MyApp.App.Preferences().SetString("Mode", "Sync")
+				MyApp.App.Preferences().SetString("StorageMode", "Sync")
 				return
 			} else {
 				LoadSyncUI(MyApp)
@@ -38,9 +38,9 @@ func MakeSettingsTab(MyApp logic.MyApp) fyne.CanvasObject {
 			ShowError("Cannot connect to server, check details or if server is running", MyApp)
 		}
 
-		if MyApp.App.Preferences().String("Mode") == "Desync" && logic.IsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"))) {
+		if MyApp.App.Preferences().String("StorageMode") == "Desync" && logic.IsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"))) {
 			if !logic.FileConflictCheck(MyApp) {
-				MyApp.App.Preferences().SetString("Mode", "Sync")
+				MyApp.App.Preferences().SetString("StorageMode", "Sync")
 				return
 			} else {
 				LoadSyncUI(MyApp)
