@@ -3,6 +3,7 @@ package logic
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"fyne.io/fyne/v2/storage"
 )
@@ -28,4 +29,8 @@ func IsInSyncModeAndServerInaccessible(MyApp MyApp) bool {
 	} else {
 		return false
 	}
+}
+
+func ContainsComma(s string) bool {
+	return strings.Contains(s, ",")
 }

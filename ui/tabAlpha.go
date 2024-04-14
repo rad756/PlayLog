@@ -160,6 +160,10 @@ func makeChangeKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *wid
 			ShowError("Cannot add empty field to "+ta.Kind, MyApp)
 			return
 		}
+		if logic.ContainsComma(tabKindEnt.Text) {
+			ShowError(fmt.Sprintf("You cannot have a comma in %s name", ta.Kind), MyApp)
+			return
+		}
 		k.AddKind(tabKindEnt.Text, (ta.Name + "-" + ta.Kind), MyApp)
 
 		kindSel.Options = k.Slice
