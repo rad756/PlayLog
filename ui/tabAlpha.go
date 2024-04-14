@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -36,6 +37,10 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 
 	kindSel := widget.NewSelect(kind.Slice, nil)
 	kindSel.PlaceHolder = fmt.Sprintf("Select %s", tabAlpha.Kind)
+	moreKindBtn := widget.NewButtonWithIcon("", theme.ListIcon(), func() {
+		makeMoreKindPopUp(MyApp, tabAlpha, kind, kindSel)
+	})
+	kindBorder := container.NewBorder(nil, nil, nil, moreKindBtn, kindSel)
 
 	addBtn := widget.NewButton("Add "+tabAlpha.Name, func() {
 		var err []string
@@ -118,7 +123,7 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 		}
 	}
 
-	vBox := container.NewVBox(nameEnt, kindSel, addBtn, layout.NewSpacer(), changeBtn, changeKindBtn, layout.NewSpacer(), centeredFinishedCountLbl, layout.NewSpacer(), deleteBtn)
+	vBox := container.NewVBox(nameEnt, kindBorder, addBtn, layout.NewSpacer(), changeBtn, changeKindBtn, layout.NewSpacer(), centeredFinishedCountLbl, layout.NewSpacer(), deleteBtn)
 	tab := container.NewHSplit(lst, vBox)
 	tab.Offset = MyApp.App.Preferences().Float("GlobalOffset")
 
@@ -161,4 +166,39 @@ func makeChangeKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *wid
 	tabKindPopUp = widget.NewModalPopUp(content, MyApp.Win.Canvas())
 	tabKindPopUp.Resize(fyne.NewSize(200, 0))
 	tabKindPopUp.Show()
+}
+
+func makeMoreKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *widget.Select) {
+	var moreKindPopUP *widget.PopUp
+	var checkGroup *widget.CheckGroup
+	var selectedKind []string
+
+	titleLbl := widget.NewLabel(fmt.Sprintf("---Multi %s Selection---", ta.Kind))
+	centeredTitle := container.NewCenter(titleLbl)
+	selectedLbl := widget.NewLabel("")
+	clearBtn := widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
+		checkGroup.SetSelected([]string{})
+		selectedLbl.SetText(strings.Join(selectedKind, " "))
+		selectedLbl.Refresh()
+	})
+	selectedBorder := container.NewBorder(nil, nil, nil, clearBtn, selectedLbl)
+
+	backBtn := widget.NewButton("Back", func() { moreKindPopUP.Hide() })
+	saveSelectionBtn := widget.NewButton("Save Selection", func() {})
+
+	checkGroup = widget.NewCheckGroup(k.Slice, func(s []string) {
+		selectedKind = s
+		selectedLbl.SetText(strings.Join(selectedKind, " "))
+		selectedLbl.Refresh()
+	})
+
+	scroll := container.NewScroll(checkGroup)
+	topVbox := container.NewVBox(centeredTitle, selectedBorder)
+	bottomGrid := container.NewAdaptiveGrid(2, backBtn, saveSelectionBtn)
+
+	content := container.NewBorder(topVbox, bottomGrid, nil, nil, scroll)
+
+	moreKindPopUP = widget.NewModalPopUp(content, MyApp.Win.Canvas())
+	moreKindPopUP.Resize(fyne.NewSize(250, 350))
+	moreKindPopUP.Show()
 }
