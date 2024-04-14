@@ -156,6 +156,10 @@ func makeChangeKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *wid
 	tabKindEnt.SetPlaceHolder(fmt.Sprintf("Enter %s Name", ta.Kind))
 
 	addKindBtn := widget.NewButton("Add "+ta.Kind, func() {
+		if tabKindEnt.Text == "" {
+			ShowError("Cannot add empty field to "+ta.Kind, MyApp)
+			return
+		}
 		k.AddKind(tabKindEnt.Text, (ta.Name + "-" + ta.Kind), MyApp)
 
 		kindSel.Options = k.Slice
@@ -173,7 +177,6 @@ func makeChangeKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *wid
 			kindSel.ClearSelected()
 			tks.Options = k.Slice
 			tks.ClearSelected()
-
 		}
 	})
 
