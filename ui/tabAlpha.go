@@ -40,7 +40,7 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 	kindSel := widget.NewSelect(kind.Slice, nil)
 	kindSel.PlaceHolder = fmt.Sprintf("Select %s", tabAlpha.Kind)
 	moreKindBtn := widget.NewButtonWithIcon("", theme.ListIcon(), func() {
-		makeMoreKindPopUp(MyApp, tabAlpha, kind, kindSel, tabAlpha)
+		makeMoreKindPopUp(MyApp, tabAlpha, kind, kindSel, tabAlpha, kindSel.Selected)
 	})
 	clearKindBtn := widget.NewButtonWithIcon("", theme.ContentClearIcon(), func() {
 		kindSel.SetOptions(kind.Slice)
@@ -189,7 +189,7 @@ func makeChangeKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *wid
 	tabKindPopUp.Show()
 }
 
-func makeMoreKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *widget.Select, tabAlpha TabAlpha) {
+func makeMoreKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *widget.Select, tabAlpha TabAlpha, oldSelection string) {
 	var moreKindPopUP *widget.PopUp
 	var checkGroup *widget.CheckGroup
 	var selectedKind []string
@@ -207,21 +207,38 @@ func makeMoreKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *widge
 	backBtn := widget.NewButton("Back", func() { moreKindPopUP.Hide() })
 	saveSelectionBtn := widget.NewButton("Save Selection", func() {
 		if len(selectedKind) > 1 {
-			tks.SetOptions([]string{strings.Join(selectedKind, " ")})
+			tks.SetOptions([]string{selectedLbl.Text})
 			tks.SetSelectedIndex(0)
 			tks.Refresh()
-			moreKindPopUP.Hide()
 			tabAlpha.MultiKind = true
+			moreKindPopUP.Hide()
+		} else if len(selectedKind) == 1 {
+			tks.SetOptions(k.Slice)
+			tks.SetSelected(selectedLbl.Text)
+			tks.Refresh()
+			tabAlpha.MultiKind = false
+			moreKindPopUP.Hide()
 		} else {
-			ShowError("Need to select more than 1", MyApp)
+			ShowError(fmt.Sprintf("You need to select %s(s)", ta.Kind), MyApp)
 		}
 	})
 
 	checkGroup = widget.NewCheckGroup(k.Slice, func(s []string) {
 		selectedKind = s
-		selectedLbl.SetText(strings.Join(selectedKind, " "))
+		var selectedKind string
+		for i := 0; i < len(s); i++ {
+			selectedKind = selectedKind + s[i] + ", "
+		}
+		selectedKind = strings.TrimSuffix(selectedKind, ", ")
+
+		selectedLbl.SetText(selectedKind)
 		selectedLbl.Refresh()
 	})
+
+	if oldSelection != "" {
+		checks := strings.Split(oldSelection, ", ")
+		checkGroup.SetSelected(checks)
+	}
 
 	scroll := container.NewScroll(checkGroup)
 	topVbox := container.NewVBox(centeredTitle, selectedBorder)
