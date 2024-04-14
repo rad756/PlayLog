@@ -87,7 +87,7 @@ func NewTabBeta(betaSlice *logic.BetaSlice, MyApp logic.MyApp, tabBeta TabBeta) 
 
 		if len(err) != 0 {
 			ShowError(strings.Join(err[:], "\n\n"), MyApp)
-		} else if !logic.IsInSyncModeAndServerAccessible(MyApp) {
+		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
 			ShowServerInaccessibleError(MyApp)
 		} else {
 			betaSlice.AddBeta(nameEnt.Text, countEnt.Text, subCountEnt.Text, finishedCck.Checked, MyApp, tabBeta.Name)
@@ -117,7 +117,7 @@ func NewTabBeta(betaSlice *logic.BetaSlice, MyApp logic.MyApp, tabBeta TabBeta) 
 
 		if len(err) != 0 {
 			ShowError(strings.Join(err[:], "\n\n"), MyApp)
-		} else if !logic.IsInSyncModeAndServerAccessible(MyApp) {
+		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
 			ShowServerInaccessibleError(MyApp)
 		} else {
 			betaSlice.DeleteBeta(tabBeta.ID, MyApp, tabBeta.Name)
@@ -137,7 +137,7 @@ func NewTabBeta(betaSlice *logic.BetaSlice, MyApp logic.MyApp, tabBeta TabBeta) 
 	deleteBtn := widget.NewButton("Delete Selected "+tabBeta.Name, func() {
 		if tabBeta.ID == -1 {
 			ShowError(fmt.Sprintf("No %s was selected to be deleted", strings.ToLower(tabBeta.Name)), MyApp)
-		} else if !logic.IsInSyncModeAndServerAccessible(MyApp) {
+		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
 			ShowServerInaccessibleError(MyApp)
 		} else {
 			betaSlice.DeleteBeta(tabBeta.ID, MyApp, tabBeta.Name)

@@ -13,13 +13,15 @@ import (
 )
 
 type TabAlpha struct {
-	Name string
-	Kind string
-	ID   int
+	Name      string
+	Kind      string
+	ID        int
+	MultiKind bool
 }
 
 func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAlpha, kind *logic.Kind) fyne.CanvasObject {
 	var finishedCountLbl *widget.Label
+	tabAlpha.MultiKind = false
 
 	lst := widget.NewList(
 		func() int {
@@ -38,9 +40,15 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 	kindSel := widget.NewSelect(kind.Slice, nil)
 	kindSel.PlaceHolder = fmt.Sprintf("Select %s", tabAlpha.Kind)
 	moreKindBtn := widget.NewButtonWithIcon("", theme.ListIcon(), func() {
-		makeMoreKindPopUp(MyApp, tabAlpha, kind, kindSel)
+		makeMoreKindPopUp(MyApp, tabAlpha, kind, kindSel, tabAlpha)
 	})
-	kindBorder := container.NewBorder(nil, nil, nil, moreKindBtn, kindSel)
+	clearKindBtn := widget.NewButtonWithIcon("", theme.ContentClearIcon(), func() {
+		kindSel.SetOptions(kind.Slice)
+		kindSel.ClearSelected()
+		kindSel.Refresh()
+		tabAlpha.ID = -1
+	})
+	kindBorder := container.NewBorder(nil, nil, clearKindBtn, moreKindBtn, kindSel)
 
 	addBtn := widget.NewButton("Add "+tabAlpha.Name, func() {
 		var err []string
@@ -54,7 +62,7 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 
 		if len(err) != 0 {
 			ShowError(strings.Join(err[:], "\n\n"), MyApp)
-		} else if !logic.IsInSyncModeAndServerAccessible(MyApp) {
+		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
 			ShowServerInaccessibleError(MyApp)
 		} else {
 			alphaSlice.AddAlpha(nameEnt.Text, kindSel.Selected, MyApp, tabAlpha.Name)
@@ -78,7 +86,7 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 
 		if len(err) != 0 {
 			ShowError(strings.Join(err[:], "\n\n"), MyApp)
-		} else if !logic.IsInSyncModeAndServerAccessible(MyApp) {
+		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
 			ShowServerInaccessibleError(MyApp)
 		} else {
 			alphaSlice.DeleteAlpha(tabAlpha.ID, MyApp, tabAlpha.Name)
@@ -98,7 +106,7 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 	deleteBtn := widget.NewButton("Delete Selected "+tabAlpha.Name, func() {
 		if tabAlpha.ID == -1 {
 			ShowError(fmt.Sprintf("No %s was selected to be deleted", strings.ToLower(tabAlpha.Name)), MyApp)
-		} else if !logic.IsInSyncModeAndServerAccessible(MyApp) {
+		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
 			ShowServerInaccessibleError(MyApp)
 		} else {
 			alphaSlice.DeleteAlpha(tabAlpha.ID, MyApp, tabAlpha.Name)
@@ -111,15 +119,25 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 
 	lst.OnSelected = func(id widget.ListItemID) {
 		tabAlpha.ID = id
+		isInKind := false
 
 		nameEnt.Text = alphaSlice.Slice[id].Name
 		nameEnt.Refresh()
 
 		for i := range kind.Slice {
 			if kind.Slice[i] == alphaSlice.Slice[id].Kind {
+				isInKind = true
+				tabAlpha.MultiKind = false
+				kindSel.SetOptions(kind.Slice)
 				kindSel.SetSelectedIndex(i)
 				return
 			}
+		}
+
+		if !isInKind {
+			kindSel.SetOptions([]string{alphaSlice.Slice[id].Kind})
+			kindSel.SetSelectedIndex(0)
+			tabAlpha.MultiKind = true
 		}
 	}
 
@@ -168,7 +186,7 @@ func makeChangeKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *wid
 	tabKindPopUp.Show()
 }
 
-func makeMoreKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *widget.Select) {
+func makeMoreKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *widget.Select, tabAlpha TabAlpha) {
 	var moreKindPopUP *widget.PopUp
 	var checkGroup *widget.CheckGroup
 	var selectedKind []string
@@ -184,7 +202,17 @@ func makeMoreKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *widge
 	selectedBorder := container.NewBorder(nil, nil, nil, clearBtn, selectedLbl)
 
 	backBtn := widget.NewButton("Back", func() { moreKindPopUP.Hide() })
-	saveSelectionBtn := widget.NewButton("Save Selection", func() {})
+	saveSelectionBtn := widget.NewButton("Save Selection", func() {
+		if len(selectedKind) > 1 {
+			tks.SetOptions([]string{strings.Join(selectedKind, " ")})
+			tks.SetSelectedIndex(0)
+			tks.Refresh()
+			moreKindPopUP.Hide()
+			tabAlpha.MultiKind = true
+		} else {
+			ShowError("Need to select more than 1", MyApp)
+		}
+	})
 
 	checkGroup = widget.NewCheckGroup(k.Slice, func(s []string) {
 		selectedKind = s
