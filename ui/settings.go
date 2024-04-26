@@ -21,6 +21,7 @@ func MakeSettingsTab(MyApp logic.MyApp) fyne.CanvasObject {
 	currentModeLbl := widget.NewLabelWithData(binding.NewSprintf("Current mode: %s", ModeBind))
 
 	switchModeBtn := widget.NewButton("Switch Mode", func() {
+		var err []string
 		if MyApp.App.Preferences().String("StorageMode") == "Sync" {
 			MyApp.App.Preferences().SetString("StorageMode", "Local")
 			return
@@ -35,19 +36,25 @@ func MakeSettingsTab(MyApp logic.MyApp) fyne.CanvasObject {
 				return
 			}
 		} else {
-			ShowError("Cannot connect to server, check details or if server is running", MyApp)
+			err = append(err, "Cannot connect to server, check details or if server is running")
 		}
 
 		if MyApp.App.Preferences().String("StorageMode") == "Desync" && logic.IsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"))) {
 			if !logic.FileConflictCheck(MyApp) {
 				MyApp.App.Preferences().SetString("StorageMode", "Sync")
+				fmt.Println("a")
 				return
 			} else {
-				LoadSyncUI(MyApp)
+				fmt.Println("b")
+				MyApp.Win.SetContent(LoadSyncUI(MyApp))
 				return
 			}
 		} else {
-			ShowError("Cannot switch to Sync Mode, check server details or if server is running", MyApp)
+			err = append(err, "Cannot switch to Sync Mode, check server details or if server is running")
+		}
+
+		if len(err) != 0 {
+			ShowError(strings.Join(err[:], "\n\n"), MyApp)
 		}
 
 	})
