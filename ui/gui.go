@@ -24,6 +24,13 @@ func LoadGUI(MyApp logic.MyApp) fyne.CanvasObject {
 		} else {
 			content = LoadMainUI(MyApp)
 		}
+	} else if MyApp.App.Preferences().String("StorageMode") == "Desync" && logic.IsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"))) {
+		if logic.FileConflictCheck(MyApp) {
+			content = LoadSyncUI(MyApp)
+		} else {
+			content = LoadMainUI(MyApp)
+			MyApp.App.Preferences().SetString("StorageMode", "Sync")
+		}
 	} else { //Runs in Local Mode
 		content = LoadMainUI(MyApp)
 	}
