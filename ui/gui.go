@@ -40,7 +40,7 @@ func BootSyncingUI(MyApp logic.MyApp) fyne.CanvasObject {
 		MyApp.Win.SetContent(LoadMainUI(MyApp))
 	})
 
-	vbox := container.NewVBox(centeredCheckLbl, progessBar)
+	vbox := container.NewVBox(layout.NewSpacer(), centeredCheckLbl, progessBar, layout.NewSpacer())
 
 	return container.NewBorder(nil, desyncModeBtn, nil, nil, vbox)
 }
