@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"net"
+	"net/http"
 	"playlog/logic"
 
 	"fyne.io/fyne/v2"
@@ -12,30 +13,36 @@ import (
 )
 
 func LoadGUI(MyApp logic.MyApp) fyne.CanvasObject {
-	var content fyne.CanvasObject
-
 	if MyApp.App.Preferences().Bool("FirstRun") {
-		content = LoadSetupUI(MyApp)
-	} else if MyApp.App.Preferences().String("StorageMode") == "Sync" {
-		if !logic.IsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"))) {
-			content = LoadStartUpServerError(MyApp)
-		} else if logic.FileConflictCheck(MyApp) {
-			content = LoadSyncUI(MyApp)
-		} else {
-			content = LoadMainUI(MyApp)
-		}
-	} else if MyApp.App.Preferences().String("StorageMode") == "Desync" && logic.IsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"))) {
-		if logic.FileConflictCheck(MyApp) {
-			content = LoadSyncUI(MyApp)
-		} else {
-			content = LoadMainUI(MyApp)
-			MyApp.App.Preferences().SetString("StorageMode", "Sync")
-		}
-	} else { //Runs in Local Mode
-		content = LoadMainUI(MyApp)
+		return LoadSetupUI(MyApp)
 	}
 
-	return content
+	if MyApp.App.Preferences().String("StorageMode") == "Local" {
+		return LoadMainUI(MyApp)
+	}
+
+	return BootSyncingUI(MyApp)
+
+}
+
+func BootSyncingUI(MyApp logic.MyApp) fyne.CanvasObject {
+	cancelling := false
+
+	go GRIsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port")), &cancelling, MyApp)
+
+	checkLbl := widget.NewLabel("Checking if server is accessible...")
+	centeredCheckLbl := container.NewCenter(checkLbl)
+	progessBar := widget.NewProgressBarInfinite()
+
+	desyncModeBtn := widget.NewButton("Enter Desync Mode", func() {
+		cancelling = true
+		MyApp.App.Preferences().SetString("StorageMode", "Desync")
+		MyApp.Win.SetContent(LoadMainUI(MyApp))
+	})
+
+	vbox := container.NewVBox(centeredCheckLbl, progessBar)
+
+	return container.NewBorder(nil, desyncModeBtn, nil, nil, vbox)
 }
 
 func LoadMainUI(MyApp logic.MyApp) *container.AppTabs {
@@ -151,4 +158,24 @@ func ShowServerInaccessibleError(MyApp logic.MyApp) {
 
 	errorPpu = widget.NewModalPopUp(content, MyApp.Win.Canvas())
 	errorPpu.Show()
+}
+
+func GRIsServerAccessible(uri string, cancelled *bool, MyApp logic.MyApp) {
+	_, err := http.Get(uri)
+
+	if *cancelled {
+		return
+	}
+
+	if err != nil {
+		MyApp.App.Preferences().SetString("StorageMode", "Desync")
+		MyApp.Win.SetContent(LoadMainUI(MyApp))
+	} else {
+		MyApp.App.Preferences().SetString("StorageMode", "Sync")
+		if logic.FileConflictCheck(MyApp) {
+			MyApp.Win.SetContent(LoadSyncUI(MyApp))
+		} else {
+			MyApp.Win.SetContent(LoadMainUI(MyApp))
+		}
+	}
 }
