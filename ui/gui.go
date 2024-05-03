@@ -29,7 +29,7 @@ func LoadGUI(MyApp logic.MyApp) fyne.CanvasObject {
 func BootSyncingUI(MyApp logic.MyApp) fyne.CanvasObject {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 
-	go IsServerAccessibleBoot(MyApp, ctx, cancel, LoadMenuAfterServerBootCheck)
+	go logic.IsServerAccessibleBoot(MyApp, ctx, cancel, LoadMenuAfterServerBootCheck)
 
 	checkLbl := widget.NewLabel("Checking if server is accessible...")
 	centeredCheckLbl := container.NewCenter(checkLbl)
@@ -167,17 +167,4 @@ func LoadMenuAfterServerBootCheck(MyApp logic.MyApp, err error) {
 	}
 
 	MyApp.Win.SetContent(LoadMainUI(MyApp))
-}
-
-func IsServerAccessibleBoot(MyApp logic.MyApp, ctx context.Context, cancel context.CancelFunc, callback func(logic.MyApp, error)) {
-	defer cancel()
-
-	ip := MyApp.App.Preferences().String("IP")
-	port := MyApp.App.Preferences().String("Port")
-
-	d := &net.Dialer{}
-
-	_, err := d.DialContext(ctx, "tcp", ip+":"+port)
-
-	callback(MyApp, err)
 }

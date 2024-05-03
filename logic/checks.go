@@ -1,7 +1,9 @@
 package logic
 
 import (
+	"context"
 	"fmt"
+	"net"
 	"strconv"
 	"strings"
 
@@ -33,4 +35,17 @@ func IsInSyncModeAndServerInaccessible(MyApp MyApp) bool {
 
 func ContainsComma(s string) bool {
 	return strings.Contains(s, ",")
+}
+
+func IsServerAccessibleBoot(MyApp MyApp, ctx context.Context, cancel context.CancelFunc, callback func(MyApp, error)) {
+	defer cancel()
+
+	ip := MyApp.App.Preferences().String("IP")
+	port := MyApp.App.Preferences().String("Port")
+
+	d := &net.Dialer{}
+
+	_, err := d.DialContext(ctx, "tcp", ip+":"+port)
+
+	callback(MyApp, err)
 }
