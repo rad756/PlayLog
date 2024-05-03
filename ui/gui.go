@@ -1,10 +1,11 @@
 package ui
 
 import (
+	"context"
 	"fmt"
 	"net"
-	"net/http"
 	"playlog/logic"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -26,18 +27,16 @@ func LoadGUI(MyApp logic.MyApp) fyne.CanvasObject {
 }
 
 func BootSyncingUI(MyApp logic.MyApp) fyne.CanvasObject {
-	cancelling := false
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 
-	go GRIsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port")), &cancelling, MyApp)
+	go IsServerAccessibleBoot(MyApp, ctx, cancel, LoadMenuAfterServerBootCheck)
 
 	checkLbl := widget.NewLabel("Checking if server is accessible...")
 	centeredCheckLbl := container.NewCenter(checkLbl)
 	progessBar := widget.NewProgressBarInfinite()
 
-	desyncModeBtn := widget.NewButton("Enter Desync Mode", func() {
-		cancelling = true
-		MyApp.App.Preferences().SetString("StorageMode", "Desync")
-		MyApp.Win.SetContent(LoadMainUI(MyApp))
+	desyncModeBtn := widget.NewButton("Cancel Check & Enter Desync Mode", func() {
+		cancel()
 	})
 
 	vbox := container.NewVBox(layout.NewSpacer(), centeredCheckLbl, progessBar, layout.NewSpacer())
@@ -160,22 +159,42 @@ func ShowServerInaccessibleError(MyApp logic.MyApp) {
 	errorPpu.Show()
 }
 
-func GRIsServerAccessible(uri string, cancelled *bool, MyApp logic.MyApp) {
-	_, err := http.Get(uri)
-
-	if *cancelled {
-		return
-	}
-
+func LoadMenuAfterServerBootCheck(MyApp logic.MyApp, err error) {
 	if err != nil {
 		MyApp.App.Preferences().SetString("StorageMode", "Desync")
-		MyApp.Win.SetContent(LoadMainUI(MyApp))
 	} else {
 		MyApp.App.Preferences().SetString("StorageMode", "Sync")
-		if logic.FileConflictCheck(MyApp) {
-			MyApp.Win.SetContent(LoadSyncUI(MyApp))
-		} else {
-			MyApp.Win.SetContent(LoadMainUI(MyApp))
-		}
 	}
+
+	MyApp.Win.SetContent(LoadMainUI(MyApp))
+}
+
+func IsServerAccessibleBoot(MyApp logic.MyApp, ctx context.Context, cancel context.CancelFunc, callback func(logic.MyApp, error)) {
+	defer cancel()
+
+	ip := MyApp.App.Preferences().String("IP")
+	port := MyApp.App.Preferences().String("Port")
+
+	d := &net.Dialer{}
+
+	_, err := d.DialContext(ctx, "tcp", ip+":"+port)
+
+	callback(MyApp, err)
+	// _, err := http.Get(uri)
+
+	// if *cancelled {
+	// 	return
+	// }
+
+	// if err != nil {
+	// 	MyApp.App.Preferences().SetString("StorageMode", "Desync")
+	// 	MyApp.Win.SetContent(LoadMainUI(MyApp))
+	// } else {
+	// 	MyApp.App.Preferences().SetString("StorageMode", "Sync")
+	// 	if logic.FileConflictCheck(MyApp) {
+	// 		MyApp.Win.SetContent(LoadSyncUI(MyApp))
+	// 	} else {
+	// 		MyApp.Win.SetContent(LoadMainUI(MyApp))
+	// 	}
+	// }
 }
