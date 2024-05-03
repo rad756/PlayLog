@@ -180,21 +180,4 @@ func IsServerAccessibleBoot(MyApp logic.MyApp, ctx context.Context, cancel conte
 	_, err := d.DialContext(ctx, "tcp", ip+":"+port)
 
 	callback(MyApp, err)
-	// _, err := http.Get(uri)
-
-	// if *cancelled {
-	// 	return
-	// }
-
-	// if err != nil {
-	// 	MyApp.App.Preferences().SetString("StorageMode", "Desync")
-	// 	MyApp.Win.SetContent(LoadMainUI(MyApp))
-	// } else {
-	// 	MyApp.App.Preferences().SetString("StorageMode", "Sync")
-	// 	if logic.FileConflictCheck(MyApp) {
-	// 		MyApp.Win.SetContent(LoadSyncUI(MyApp))
-	// 	} else {
-	// 		MyApp.Win.SetContent(LoadMainUI(MyApp))
-	// 	}
-	// }
 }
