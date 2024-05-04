@@ -6,19 +6,18 @@ import (
 	"playlog/logic"
 	"strconv"
 
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 )
 
-func LoadSetupUI(MyApp logic.MyApp) fyne.CanvasObject {
+func LoadSetupUI(MyApp logic.MyApp) {
 	questionLbl := widget.NewLabel("Select which mode app will run in, Local or Server Sync")
 	localBtn := widget.NewButton("Local Setup", func() {
 		MyApp.App.Preferences().SetString("StorageMode", "Local")
 		MyApp.App.Preferences().SetBool("FirstRun", false)
-		MyApp.Win.SetContent(LoadMainUI(MyApp))
+		LoadMainUI(MyApp)
 	})
 
 	serverIpLbl := widget.NewLabel("Enter Server IP Address")
@@ -52,10 +51,12 @@ func LoadSetupUI(MyApp logic.MyApp) fyne.CanvasObject {
 		} else {
 			logic.ServerSetup(ip, port, "Sync", MyApp)
 			MyApp.App.Preferences().SetBool("FirstRun", false)
-			MyApp.Win.SetContent(LoadMainUI(MyApp))
+			LoadMainUI(MyApp)
 		}
 
 	})
 
-	return container.New(layout.NewVBoxLayout(), questionLbl, localBtn, serverIpLbl, serverIpEnt, serverPortLbl, serverPortEnt, serverBtn)
+	content := container.New(layout.NewVBoxLayout(), questionLbl, localBtn, serverIpLbl, serverIpEnt, serverPortLbl, serverPortEnt, serverBtn)
+
+	MyApp.Win.SetContent(content)
 }

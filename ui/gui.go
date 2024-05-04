@@ -7,27 +7,27 @@ import (
 	"playlog/logic"
 	"time"
 
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 )
 
-func LoadGUI(MyApp logic.MyApp) fyne.CanvasObject {
+func LoadGUI(MyApp logic.MyApp) {
 	if MyApp.App.Preferences().Bool("FirstRun") {
-		return LoadSetupUI(MyApp)
+		LoadSetupUI(MyApp)
+		return
 	}
 
 	if MyApp.App.Preferences().String("StorageMode") == "Local" {
-		return LoadMainUI(MyApp)
+		LoadMainUI(MyApp)
+		return
 	}
 
-	return BootSyncingUI(MyApp)
-
+	BootSyncingUI(MyApp)
 }
 
-func BootSyncingUI(MyApp logic.MyApp) fyne.CanvasObject {
+func BootSyncingUI(MyApp logic.MyApp) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 
 	go logic.IsServerAccessibleBoot(MyApp, ctx, cancel, LoadMenuAfterServerBootCheck)
@@ -42,10 +42,12 @@ func BootSyncingUI(MyApp logic.MyApp) fyne.CanvasObject {
 
 	vbox := container.NewVBox(layout.NewSpacer(), centeredCheckLbl, progessBar, layout.NewSpacer())
 
-	return container.NewBorder(nil, desyncModeBtn, nil, nil, vbox)
+	content := container.NewBorder(nil, desyncModeBtn, nil, nil, vbox)
+
+	MyApp.Win.SetContent(content)
 }
 
-func LoadMainUI(MyApp logic.MyApp) *container.AppTabs {
+func LoadMainUI(MyApp logic.MyApp) {
 	gameTab := &TabAlpha{Name: "Game", Kind: "Platform", ID: -1}
 	gameKind := logic.ReadAlphaKind("Game-Platform", MyApp)
 	movieTab := &TabAlpha{Name: "Movie", Kind: "Genre", ID: -1}
@@ -58,23 +60,25 @@ func LoadMainUI(MyApp logic.MyApp) *container.AppTabs {
 		container.NewTabItem("Shows", NewTabBeta(logic.ReadBetaSlice(showTab.Name, MyApp), MyApp, *showTab)),
 		container.NewTabItem("Settings", MakeSettingsTab(MyApp)))
 
-	return content
+	MyApp.Win.SetContent(content)
 }
 
-func LoadStartUpServerError(MyApp logic.MyApp) fyne.CanvasObject {
+func LoadStartUpServerError(MyApp logic.MyApp) {
 	topLbl := widget.NewLabel("-- Startup Error --")
 	topContent := container.New(layout.NewCenterLayout(), topLbl)
 	errorLbl := widget.NewLabel("Server with IP " + MyApp.App.Preferences().String("IP") + " is inaccessible\nThe app will start in Desync Mode and try to sync upon next startup\nOr you can try to enter Sync Mode by pressing Switch Mode in Settings")
 	desyncModeBtn := widget.NewButton("Enter Desync Mode", func() {
 		MyApp.App.Preferences().SetString("StorageMode", "Desync")
 
-		MyApp.Win.SetContent(LoadMainUI(MyApp))
+		LoadMainUI(MyApp)
 	})
 
-	return container.New(layout.NewVBoxLayout(), topContent, errorLbl, desyncModeBtn)
+	content := container.New(layout.NewVBoxLayout(), topContent, errorLbl, desyncModeBtn)
+
+	MyApp.Win.SetContent(content)
 }
 
-func LoadSyncUI(MyApp logic.MyApp) fyne.CanvasObject {
+func LoadSyncUI(MyApp logic.MyApp) {
 	errorLbl := widget.NewLabel("-- Sync Error --")
 	errorCentered := container.NewCenter(errorLbl)
 	questionLbl := widget.NewLabel("Do you want to download server files OR upload local files to server?")
@@ -83,18 +87,19 @@ func LoadSyncUI(MyApp logic.MyApp) fyne.CanvasObject {
 	serverFilesBtn := widget.NewButton("Download Server Files", func() {
 		logic.DownloadFromServer(MyApp)
 		MyApp.App.Preferences().SetString("StorageMode", "Sync")
-		MyApp.Win.SetContent(LoadMainUI(MyApp))
+		LoadMainUI(MyApp)
 	})
 	orLbl := widget.NewLabel("OR")
 	orCentered := container.NewCenter(orLbl)
 	localFilesBtn := widget.NewButton("Upload Local Files", func() {
 		logic.UploadToServer(MyApp)
 		MyApp.App.Preferences().SetString("StorageMode", "Sync")
-		MyApp.Win.SetContent(LoadMainUI(MyApp))
+		LoadMainUI(MyApp)
 	})
 
-	return container.NewVBox(errorCentered, questionCentered, serverFilesBtn, orCentered, localFilesBtn)
+	content := container.NewVBox(errorCentered, questionCentered, serverFilesBtn, orCentered, localFilesBtn)
 
+	MyApp.Win.SetContent(content)
 }
 
 func ShowServerInaccessibleError(MyApp logic.MyApp) {
@@ -153,5 +158,5 @@ func LoadMenuAfterServerBootCheck(MyApp logic.MyApp, err error) {
 		MyApp.App.Preferences().SetString("StorageMode", "Sync")
 	}
 
-	MyApp.Win.SetContent(LoadMainUI(MyApp))
+	LoadMainUI(MyApp)
 }

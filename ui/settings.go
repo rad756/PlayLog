@@ -42,11 +42,9 @@ func MakeSettingsTab(MyApp logic.MyApp) fyne.CanvasObject {
 		if MyApp.App.Preferences().String("StorageMode") == "Desync" && logic.IsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"))) {
 			if !logic.FileConflictCheck(MyApp) {
 				MyApp.App.Preferences().SetString("StorageMode", "Sync")
-				fmt.Println("a")
 				return
 			} else {
-				fmt.Println("b")
-				MyApp.Win.SetContent(LoadSyncUI(MyApp))
+				LoadSyncUI(MyApp)
 				return
 			}
 		} else {
