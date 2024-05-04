@@ -7,6 +7,7 @@ import (
 	"playlog/logic"
 	"time"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
@@ -159,4 +160,41 @@ func LoadMenuAfterServerBootCheck(MyApp logic.MyApp, err error) {
 	}
 
 	LoadMainUI(MyApp)
+}
+
+func GetLoadingPopUp(MyApp logic.MyApp, cancel context.CancelFunc) *widget.PopUp {
+	var popup *widget.PopUp
+	lbl := widget.NewLabel("Checking server...")
+	centeredLbl := container.NewCenter(lbl)
+	pg := widget.NewProgressBarInfinite()
+	btn := widget.NewButton("Cancel Check", func() {
+		cancel()
+		popup.Hide()
+	})
+
+	content := container.NewBorder(centeredLbl, btn, nil, nil, pg)
+	popup = widget.NewModalPopUp(content, MyApp.Win.Canvas())
+	popup.Resize(fyne.NewSize(200, 0))
+
+	return popup
+}
+
+func GetServerCheckPopUp(MyApp logic.MyApp, cancel context.CancelFunc) *widget.PopUp {
+	var popup *widget.PopUp
+	checkLbl := widget.NewLabel("Checking if server is accessible...")
+	centeredChecklbl := container.NewCenter(checkLbl)
+	progressBar := widget.NewProgressBarInfinite()
+
+	cancelBtn := widget.NewButton("Cancel Check & Enter Desync Mode", func() {
+		cancel()
+		popup.Hide()
+	})
+	warningLbl := widget.NewLabel("If canceled, you will have to retry previous action")
+	centeredWarningLbl := container.NewCenter(warningLbl)
+
+	content := container.NewVBox(layout.NewSpacer(), centeredChecklbl, progressBar, layout.NewSpacer(), cancelBtn, centeredWarningLbl)
+
+	popup = widget.NewModalPopUp(content, MyApp.Win.Canvas())
+	popup.Resize(fyne.NewSize(200, 0))
+	return popup
 }

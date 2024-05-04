@@ -8,7 +8,9 @@ import (
 	"strconv"
 	"strings"
 
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/widget"
 )
 
 func PathExists(s string, MyApp MyApp) bool {
@@ -49,6 +51,57 @@ func IsServerAccessibleBoot(MyApp MyApp, ctx context.Context, cancel context.Can
 	_, err := d.DialContext(ctx, "tcp", ip+":"+port)
 
 	callback(MyApp, err)
+}
+
+func IsServerAccessibleSwitch(MyApp MyApp, ctx context.Context, cancel context.CancelFunc, popup *widget.PopUp, callback func(MyApp)) {
+	defer cancel()
+
+	ip := MyApp.App.Preferences().String("IP")
+	port := MyApp.App.Preferences().String("Port")
+
+	d := &net.Dialer{}
+
+	_, err := d.DialContext(ctx, "tcp", ip+":"+port)
+
+	//If errored will hide popup, if not hidden already
+	if !popup.Hidden {
+		popup.Hide()
+	}
+
+	if err != nil {
+		dialog.ShowError(fmt.Errorf("Cannot Connect to Server"), MyApp.Win)
+		return
+	}
+
+	var errStr []string
+
+	if MyApp.App.Preferences().String("StorageMode") == "Local" {
+		if !FileConflictCheck(MyApp) {
+			MyApp.App.Preferences().SetString("StorageMode", "Sync")
+			return
+		} else {
+			callback(MyApp)
+			return
+		}
+	} else {
+		errStr = append(errStr, "Cannot connect to server, check details or if server is running")
+	}
+
+	if MyApp.App.Preferences().String("StorageMode") == "Desync" {
+		if !FileConflictCheck(MyApp) {
+			MyApp.App.Preferences().SetString("StorageMode", "Sync")
+			return
+		} else {
+			callback(MyApp)
+			return
+		}
+	} else {
+		errStr = append(errStr, "Cannot switch to Sync Mode, check server details or if server is running")
+	}
+
+	if len(errStr) != 0 {
+		dialog.NewError(BuildError(errStr), MyApp.Win)
+	}
 }
 
 func BuildError(errStr []string) error {

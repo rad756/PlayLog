@@ -1,10 +1,12 @@
 package ui
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"playlog/logic"
 	"strconv"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -21,40 +23,23 @@ func MakeSettingsTab(MyApp logic.MyApp) fyne.CanvasObject {
 	currentModeLbl := widget.NewLabelWithData(binding.NewSprintf("Current mode: %s", ModeBind))
 
 	switchModeBtn := widget.NewButton("Switch Mode", func() {
-		var errStr []string
 		if MyApp.App.Preferences().String("StorageMode") == "Sync" {
 			MyApp.App.Preferences().SetString("StorageMode", "Local")
 			return
 		}
 
-		if MyApp.App.Preferences().String("StorageMode") == "Local" && logic.IsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"))) {
-			if !logic.FileConflictCheck(MyApp) {
-				MyApp.App.Preferences().SetString("StorageMode", "Sync")
-				return
-			} else {
-				LoadSyncUI(MyApp)
-				return
-			}
-		} else {
-			errStr = append(errStr, "Cannot connect to server, check details or if server is running")
-		}
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 
-		if MyApp.App.Preferences().String("StorageMode") == "Desync" && logic.IsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"))) {
-			if !logic.FileConflictCheck(MyApp) {
-				MyApp.App.Preferences().SetString("StorageMode", "Sync")
-				return
-			} else {
-				LoadSyncUI(MyApp)
-				return
-			}
-		} else {
-			errStr = append(errStr, "Cannot switch to Sync Mode, check server details or if server is running")
-		}
+		popup := GetLoadingPopUp(MyApp, cancel)
 
-		if len(errStr) != 0 {
-			dialog.NewError(logic.BuildError(errStr), MyApp.Win)
+		go logic.IsServerAccessibleSwitch(MyApp, ctx, cancel, popup, LoadSyncUI)
+		time.Sleep(100 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			//do not load popup after delay
+		default:
+			popup.Show()
 		}
-
 	})
 
 	IpBind := binding.BindPreferenceString("IP", MyApp.App.Preferences())
