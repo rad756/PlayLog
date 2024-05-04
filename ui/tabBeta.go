@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -73,20 +74,20 @@ func NewTabBeta(betaSlice *logic.BetaSlice, MyApp logic.MyApp, tabBeta TabBeta) 
 	centeredFinishedCck := container.NewCenter(finishedCck)
 
 	addBtn := widget.NewButton("Add "+tabBeta.Name, func() {
-		var err []string
+		var errStr []string
 
 		if nameEnt.Text == "" {
-			err = append(err, fmt.Sprintf("%s name empty", tabBeta.Name))
+			errStr = append(errStr, fmt.Sprintf("%s name empty", tabBeta.Name))
 		}
 		if !logic.IsNum(countEnt.Text) {
-			err = append(err, fmt.Sprintf("%s %s must contain a number", tabBeta.Name, strings.ToLower(tabBeta.Count)))
+			errStr = append(errStr, fmt.Sprintf("%s %s must contain a number", tabBeta.Name, strings.ToLower(tabBeta.Count)))
 		}
 		if !logic.IsNum(subCountEnt.Text) {
-			err = append(err, fmt.Sprintf("%s %s must contain a number", tabBeta.Name, strings.ToLower(tabBeta.SubCount)))
+			errStr = append(errStr, fmt.Sprintf("%s %s must contain a number", tabBeta.Name, strings.ToLower(tabBeta.SubCount)))
 		}
 
-		if len(err) != 0 {
-			ShowError(strings.Join(err[:], "\n\n"), MyApp)
+		if len(errStr) != 0 {
+			dialog.ShowError(logic.BuildError(errStr), MyApp.Win)
 		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
 			ShowServerInaccessibleError(MyApp)
 		} else {
@@ -100,23 +101,23 @@ func NewTabBeta(betaSlice *logic.BetaSlice, MyApp logic.MyApp, tabBeta TabBeta) 
 	})
 
 	changeBtn := widget.NewButton("Change Selected "+tabBeta.Name, func() {
-		var err []string
+		var errStr []string
 
 		if nameEnt.Text == "" {
-			err = append(err, fmt.Sprintf("%s name empty", tabBeta.Name))
+			errStr = append(errStr, fmt.Sprintf("%s name empty", tabBeta.Name))
 		}
 		if !logic.IsNum(countEnt.Text) {
-			err = append(err, fmt.Sprintf("%s %s must contain a number", tabBeta.Name, strings.ToLower(tabBeta.Count)))
+			errStr = append(errStr, fmt.Sprintf("%s %s must contain a number", tabBeta.Name, strings.ToLower(tabBeta.Count)))
 		}
 		if !logic.IsNum(subCountEnt.Text) {
-			err = append(err, fmt.Sprintf("%s %s must contain a number", tabBeta.Name, strings.ToLower(tabBeta.SubCount)))
+			errStr = append(errStr, fmt.Sprintf("%s %s must contain a number", tabBeta.Name, strings.ToLower(tabBeta.SubCount)))
 		}
 		if tabBeta.ID == -1 {
-			err = append(err, fmt.Sprintf("No %s was selected to be changed", strings.ToLower(tabBeta.Name)))
+			errStr = append(errStr, fmt.Sprintf("No %s was selected to be changed", strings.ToLower(tabBeta.Name)))
 		}
 
-		if len(err) != 0 {
-			ShowError(strings.Join(err[:], "\n\n"), MyApp)
+		if len(errStr) != 0 {
+			dialog.ShowError(logic.BuildError(errStr), MyApp.Win)
 		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
 			ShowServerInaccessibleError(MyApp)
 		} else {
@@ -136,7 +137,7 @@ func NewTabBeta(betaSlice *logic.BetaSlice, MyApp logic.MyApp, tabBeta TabBeta) 
 
 	deleteBtn := widget.NewButton("Delete Selected "+tabBeta.Name, func() {
 		if tabBeta.ID == -1 {
-			ShowError(fmt.Sprintf("No %s was selected to be deleted", strings.ToLower(tabBeta.Name)), MyApp)
+			dialog.ShowError(fmt.Errorf("No %s was selected to be deleted", strings.ToLower(tabBeta.Name)), MyApp.Win)
 		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
 			ShowServerInaccessibleError(MyApp)
 		} else {

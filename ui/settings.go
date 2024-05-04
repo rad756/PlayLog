@@ -5,11 +5,11 @@ import (
 	"net"
 	"playlog/logic"
 	"strconv"
-	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -21,7 +21,7 @@ func MakeSettingsTab(MyApp logic.MyApp) fyne.CanvasObject {
 	currentModeLbl := widget.NewLabelWithData(binding.NewSprintf("Current mode: %s", ModeBind))
 
 	switchModeBtn := widget.NewButton("Switch Mode", func() {
-		var err []string
+		var errStr []string
 		if MyApp.App.Preferences().String("StorageMode") == "Sync" {
 			MyApp.App.Preferences().SetString("StorageMode", "Local")
 			return
@@ -36,7 +36,7 @@ func MakeSettingsTab(MyApp logic.MyApp) fyne.CanvasObject {
 				return
 			}
 		} else {
-			err = append(err, "Cannot connect to server, check details or if server is running")
+			errStr = append(errStr, "Cannot connect to server, check details or if server is running")
 		}
 
 		if MyApp.App.Preferences().String("StorageMode") == "Desync" && logic.IsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"))) {
@@ -50,11 +50,11 @@ func MakeSettingsTab(MyApp logic.MyApp) fyne.CanvasObject {
 				return
 			}
 		} else {
-			err = append(err, "Cannot switch to Sync Mode, check server details or if server is running")
+			errStr = append(errStr, "Cannot switch to Sync Mode, check server details or if server is running")
 		}
 
-		if len(err) != 0 {
-			ShowError(strings.Join(err[:], "\n\n"), MyApp)
+		if len(errStr) != 0 {
+			dialog.NewError(logic.BuildError(errStr), MyApp.Win)
 		}
 
 	})
@@ -71,26 +71,26 @@ func MakeSettingsTab(MyApp logic.MyApp) fyne.CanvasObject {
 	changePortEnt = widget.NewEntry()
 	changePortEnt.PlaceHolder = "New Server Port, Defaults To 7529"
 	changeServerBtn := widget.NewButton("Change Server", func() {
-		var err []string
+		var errStr []string
 		var port string
 
 		ip := changeIPEnt.Text
 
 		if ip == "" || net.ParseIP(ip) == nil {
-			err = append(err, "IP Empty or Invalid")
+			errStr = append(errStr, "IP Empty or Invalid")
 		}
 		if _, err1 := strconv.Atoi(changePortEnt.Text); err1 != nil && changePortEnt.Text != "" {
-			err = append(err, "Invalid Port")
+			errStr = append(errStr, "Invalid Port")
 		} else if _, err2 := strconv.Atoi(changePortEnt.Text); err2 == nil {
 			port = changePortEnt.Text
 		} else {
 			port = "7529"
 		}
 
-		if len(err) != 0 {
-			ShowError(strings.Join(err[:], "\n\n"), MyApp)
+		if len(errStr) != 0 {
+			dialog.ShowError(logic.BuildError(errStr), MyApp.Win)
 		} else if !logic.IsServerAccessible("http://" + ip + ":" + port) {
-			ShowError("Server: "+ip+":"+port+" is inaccesslible", MyApp)
+			dialog.ShowError(fmt.Errorf("Server: "+ip+":"+port+" is inaccesslible"), MyApp.Win)
 		} else {
 			MyApp.App.Preferences().SetString("IP", ip)
 			MyApp.App.Preferences().SetString("Port", port)

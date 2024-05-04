@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"strconv"
@@ -48,4 +49,12 @@ func IsServerAccessibleBoot(MyApp MyApp, ctx context.Context, cancel context.Can
 	_, err := d.DialContext(ctx, "tcp", ip+":"+port)
 
 	callback(MyApp, err)
+}
+
+func BuildError(errStr []string) error {
+	if len(errStr) != 0 {
+		return errors.New(strings.Join(errStr[:], "\n\n"))
+	} else {
+		return nil
+	}
 }

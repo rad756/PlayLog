@@ -9,6 +9,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 )
@@ -96,20 +97,6 @@ func LoadSyncUI(MyApp logic.MyApp) fyne.CanvasObject {
 
 }
 
-func ShowError(errorText string, MyApp logic.MyApp) {
-	var errorPpu *widget.PopUp
-
-	topLbl := widget.NewLabel("-- Error(s) --")
-	topContent := container.New(layout.NewCenterLayout(), topLbl)
-	errorLbl := widget.NewLabel(errorText)
-	backBtn := widget.NewButton("OK", func() { errorPpu.Hide() })
-
-	content := container.New(layout.NewVBoxLayout(), topContent, errorLbl, backBtn)
-
-	errorPpu = widget.NewModalPopUp(content, MyApp.Win.Canvas())
-	errorPpu.Show()
-}
-
 func ShowServerInaccessibleError(MyApp logic.MyApp) {
 	var errorPpu *widget.PopUp
 
@@ -130,11 +117,11 @@ func ShowServerInaccessibleError(MyApp logic.MyApp) {
 
 	changeServerBtn := widget.NewButton("Change Server Details", func() {
 		if changeIPEnt.Text == "" {
-			ShowError("IP empty", MyApp)
+			dialog.ShowError(fmt.Errorf("IP empty"), MyApp.Win)
 		} else if net.ParseIP(changeIPEnt.Text) == nil {
-			ShowError(changeIPEnt.Text+" is not valid IP", MyApp)
+			dialog.ShowError(fmt.Errorf(changeIPEnt.Text+" is not valid IP"), MyApp.Win)
 		} else if !logic.IsServerAccessible("http://" + changeIPEnt.Text + ":" + changePortEnt.Text) {
-			ShowError("Server with details: "+changeIPEnt.Text+":"+port+" is inaccessible", MyApp)
+			dialog.ShowError(fmt.Errorf("Server with details: "+changeIPEnt.Text+":"+port+" is inaccessible"), MyApp.Win)
 		} else {
 			MyApp.App.Preferences().SetString("StorageMode", "Sync")
 			MyApp.App.Preferences().SetString("IP", changeIPEnt.Text)

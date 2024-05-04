@@ -7,6 +7,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -51,17 +52,17 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 	kindBorder := container.NewBorder(nil, nil, clearKindBtn, moreKindBtn, kindSel)
 
 	addBtn := widget.NewButton("Add "+tabAlpha.Name, func() {
-		var err []string
+		var errStr []string
 
 		if nameEnt.Text == "" {
-			err = append(err, fmt.Sprintf("%s name empty", tabAlpha.Name))
+			errStr = append(errStr, fmt.Sprintf("%s name empty", tabAlpha.Name))
 		}
 		if kindSel.SelectedIndex() == -1 {
-			err = append(err, fmt.Sprintf("%s empty", tabAlpha.Kind))
+			errStr = append(errStr, fmt.Sprintf("%s empty", tabAlpha.Kind))
 		}
 
-		if len(err) != 0 {
-			ShowError(strings.Join(err[:], "\n\n"), MyApp)
+		if len(errStr) != 0 {
+			dialog.ShowError(logic.BuildError(errStr), MyApp.Win)
 		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
 			ShowServerInaccessibleError(MyApp)
 		} else {
@@ -75,17 +76,17 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 	})
 
 	changeBtn := widget.NewButton("Change Selected "+tabAlpha.Name, func() {
-		var err = []string{}
+		var errStr = []string{}
 
 		if nameEnt.Text == "" {
-			err = append(err, fmt.Sprintf("%s name empty", tabAlpha.Name))
+			errStr = append(errStr, fmt.Sprintf("%s name empty", tabAlpha.Name))
 		}
 		if tabAlpha.ID == -1 {
-			err = append(err, fmt.Sprintf("No %s was selected to change", strings.ToLower(tabAlpha.Name)))
+			errStr = append(errStr, fmt.Sprintf("No %s was selected to change", strings.ToLower(tabAlpha.Name)))
 		}
 
-		if len(err) != 0 {
-			ShowError(strings.Join(err[:], "\n\n"), MyApp)
+		if len(errStr) != 0 {
+			dialog.ShowError(logic.BuildError(errStr), MyApp.Win)
 		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
 			ShowServerInaccessibleError(MyApp)
 		} else {
@@ -105,7 +106,7 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 
 	deleteBtn := widget.NewButton("Delete Selected "+tabAlpha.Name, func() {
 		if tabAlpha.ID == -1 {
-			ShowError(fmt.Sprintf("No %s was selected to be deleted", strings.ToLower(tabAlpha.Name)), MyApp)
+			dialog.ShowError(fmt.Errorf("No %s was selected to be deleted", strings.ToLower(tabAlpha.Name)), MyApp.Win)
 		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
 			ShowServerInaccessibleError(MyApp)
 		} else {
@@ -156,24 +157,29 @@ func makeChangeKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *wid
 	tabKindEnt.SetPlaceHolder(fmt.Sprintf("Enter %s Name", ta.Kind))
 
 	addKindBtn := widget.NewButton("Add "+ta.Kind, func() {
+		var errStr []string
 		if tabKindEnt.Text == "" {
-			ShowError("Cannot add empty field to "+ta.Kind, MyApp)
-			return
+			errStr = append(errStr, "Cannot add empty field to "+ta.Kind)
 		}
 		if logic.ContainsComma(tabKindEnt.Text) {
-			ShowError(fmt.Sprintf("You cannot have a comma in %s name", ta.Kind), MyApp)
+			errStr = append(errStr, fmt.Sprintf("You cannot have a comma in %s name", ta.Kind))
+		}
+
+		if len(errStr) != 0 {
+			dialog.ShowError(logic.BuildError(errStr), MyApp.Win)
 			return
 		}
+
 		k.AddKind(tabKindEnt.Text, (ta.Name + "-" + ta.Kind), MyApp)
 
 		kindSel.Options = k.Slice
 		tks.Options = k.Slice
-
 	})
 
 	kindSel = widget.NewSelect(k.Slice, nil)
 	deleteKindBtn := widget.NewButton("Delete Selected "+ta.Kind, func() {
 		if kindSel.SelectedIndex() == -1 {
+			dialog.ShowError(fmt.Errorf("Need to select %s to delete", ta.Kind), MyApp.Win)
 			return
 		} else {
 			k.DeleteKind(kindSel.SelectedIndex(), (ta.Name + "-" + ta.Kind), MyApp)
@@ -223,7 +229,7 @@ func makeMoreKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *widge
 			tabAlpha.MultiKind = false
 			moreKindPopUP.Hide()
 		} else {
-			ShowError(fmt.Sprintf("You need to select %s(s)", ta.Kind), MyApp)
+			dialog.ShowError(fmt.Errorf("You need to select %s(s)", ta.Kind), MyApp.Win)
 		}
 	})
 
