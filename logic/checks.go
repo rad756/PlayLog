@@ -104,6 +104,16 @@ func IsServerAccessibleSwitch(MyApp MyApp, ctx context.Context, cancel context.C
 	}
 }
 
+func IsServerAccessibleChange(MyApp MyApp, popup *widget.PopUp, testIP string, testPort string, ctx context.Context, cancel context.CancelFunc, callback func(MyApp, error, *widget.PopUp, string, string, func(MyApp)), callback2 func(MyApp)) {
+	defer cancel()
+
+	d := &net.Dialer{}
+
+	_, err := d.DialContext(ctx, "tcp", testIP+":"+testPort)
+
+	callback(MyApp, err, popup, testIP, testPort, callback2)
+}
+
 func BuildError(errStr []string) error {
 	if len(errStr) != 0 {
 		return errors.New(strings.Join(errStr[:], "\n\n"))

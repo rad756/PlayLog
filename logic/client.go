@@ -8,7 +8,9 @@ import (
 	"mime/multipart"
 	"net/http"
 
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/storage"
+	"fyne.io/fyne/v2/widget"
 )
 
 func Upload(mar []byte, filePath string, MyApp MyApp) {
@@ -153,5 +155,22 @@ func UploadToServer(MyApp MyApp) {
 
 	for _, v := range files {
 		Upload(LocalFileToMemory(v, MyApp), v, MyApp)
+	}
+}
+
+func ChangeServer(MyApp MyApp, err error, popup *widget.PopUp, ip string, port string, callback func(MyApp)) {
+	if !popup.Hidden {
+		popup.Hide()
+	}
+
+	if err != nil {
+		dialog.ShowError(fmt.Errorf("Cannot connect to %s:%s", ip, port), MyApp.Win)
+	} else {
+		MyApp.App.Preferences().SetString("IP", ip)
+		MyApp.App.Preferences().SetString("Port", port)
+
+		if FileConflictCheck(MyApp) {
+			callback(MyApp)
+		}
 	}
 }

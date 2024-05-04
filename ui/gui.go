@@ -155,11 +155,13 @@ func ShowServerInaccessibleError(MyApp logic.MyApp) {
 func LoadMenuAfterServerBootCheck(MyApp logic.MyApp, err error) {
 	if err != nil {
 		MyApp.App.Preferences().SetString("StorageMode", "Desync")
+		dialog.ShowError(fmt.Errorf("Cannot connect to server, entered Desync mode!"), MyApp.Win)
+		LoadMainUI(MyApp)
+	} else if logic.FileConflictCheck(MyApp) {
+		LoadSyncUI(MyApp)
 	} else {
-		MyApp.App.Preferences().SetString("StorageMode", "Sync")
+		LoadMainUI(MyApp)
 	}
-
-	LoadMainUI(MyApp)
 }
 
 func GetLoadingPopUp(MyApp logic.MyApp, cancel context.CancelFunc) *widget.PopUp {

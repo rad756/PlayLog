@@ -2,7 +2,6 @@ package ui
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"playlog/logic"
 	"strconv"
@@ -72,11 +71,19 @@ func MakeSettingsTab(MyApp logic.MyApp) fyne.CanvasObject {
 
 		if len(errStr) != 0 {
 			dialog.ShowError(logic.BuildError(errStr), MyApp.Win)
-		} else if !logic.IsServerAccessible("http://" + ip + ":" + port) {
-			dialog.ShowError(fmt.Errorf("Server: "+ip+":"+port+" is inaccesslible"), MyApp.Win)
-		} else {
-			MyApp.App.Preferences().SetString("IP", ip)
-			MyApp.App.Preferences().SetString("Port", port)
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+		popup := GetLoadingPopUp(MyApp, cancel)
+		go logic.IsServerAccessibleChange(MyApp, popup, ip, port, ctx, cancel, logic.ChangeServer, LoadSyncUI)
+		time.Sleep(100 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			//do not load popup after delay
+		default:
+			popup.Show()
 		}
 	})
 
