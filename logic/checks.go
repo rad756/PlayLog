@@ -13,7 +13,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func PathExists(s string, MyApp MyApp) bool {
+func PathExists(s string, MyApp *MyApp) bool {
 	path, _ := storage.Child(MyApp.App.Storage().RootURI(), s)
 	exists, _ := storage.Exists(path)
 
@@ -28,7 +28,7 @@ func IsNum(s string) bool {
 	}
 }
 
-func IsInSyncModeAndServerInaccessible(MyApp MyApp) bool {
+func IsInSyncModeAndServerInaccessible(MyApp *MyApp) bool {
 	if MyApp.App.Preferences().String("StorageMode") == "Sync" && !IsServerAccessible(fmt.Sprintf("http://%s:%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"))) {
 		return true
 	} else {
@@ -40,7 +40,7 @@ func ContainsComma(s string) bool {
 	return strings.Contains(s, ",")
 }
 
-func IsServerAccessibleBoot(MyApp MyApp, ctx context.Context, cancel context.CancelFunc, callback func(MyApp, error)) {
+func IsServerAccessibleBoot(MyApp *MyApp, ctx context.Context, cancel context.CancelFunc, callback func(*MyApp, error)) {
 	defer cancel()
 
 	ip := MyApp.App.Preferences().String("IP")
@@ -53,7 +53,7 @@ func IsServerAccessibleBoot(MyApp MyApp, ctx context.Context, cancel context.Can
 	callback(MyApp, err)
 }
 
-func IsServerAccessibleSwitch(MyApp MyApp, ctx context.Context, cancel context.CancelFunc, popup *widget.PopUp, callback func(MyApp)) {
+func IsServerAccessibleSwitch(MyApp *MyApp, ctx context.Context, cancel context.CancelFunc, popup *widget.PopUp, callback func(*MyApp)) {
 	defer cancel()
 
 	ip := MyApp.App.Preferences().String("IP")
@@ -104,7 +104,7 @@ func IsServerAccessibleSwitch(MyApp MyApp, ctx context.Context, cancel context.C
 	}
 }
 
-func IsServerAccessibleChange(MyApp MyApp, popup *widget.PopUp, testIP string, testPort string, ctx context.Context, cancel context.CancelFunc, callback func(MyApp, error, *widget.PopUp, string, string, func(MyApp)), callback2 func(MyApp)) {
+func IsServerAccessibleChange(MyApp *MyApp, popup *widget.PopUp, testIP string, testPort string, ctx context.Context, cancel context.CancelFunc, callback func(*MyApp, error, *widget.PopUp, string, string, func(*MyApp)), callback2 func(*MyApp)) {
 	defer cancel()
 
 	d := &net.Dialer{}

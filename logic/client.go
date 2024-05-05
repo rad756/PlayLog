@@ -13,7 +13,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func Upload(mar []byte, filePath string, MyApp MyApp) {
+func Upload(mar []byte, filePath string, MyApp *MyApp) {
 	// Create a buffer to store the request body
 	var buf bytes.Buffer
 	ip := MyApp.App.Preferences().String("IP")
@@ -55,7 +55,7 @@ func Upload(mar []byte, filePath string, MyApp MyApp) {
 	defer resp.Body.Close()
 }
 
-func Download(fileName string, MyApp MyApp) {
+func Download(fileName string, MyApp *MyApp) {
 	uri := fmt.Sprintf("http://%s:%s/%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"), fileName)
 
 	// if ip == "" {
@@ -101,7 +101,7 @@ func IsServerAccessible(uri string) bool {
 	return true
 }
 
-func DownloadToMemory(fileName string, MyApp MyApp) []byte {
+func DownloadToMemory(fileName string, MyApp *MyApp) []byte {
 	uri := fmt.Sprintf("http://%s:%s/%s", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port"), fileName)
 
 	// if ip == "" {
@@ -134,7 +134,7 @@ func DownloadToMemory(fileName string, MyApp MyApp) []byte {
 	return buf.Bytes()
 }
 
-func LocalFileToMemory(fileName string, MyApp MyApp) []byte {
+func LocalFileToMemory(fileName string, MyApp *MyApp) []byte {
 	path, _ := storage.Child(MyApp.App.Storage().RootURI(), fileName)
 
 	file, _ := storage.LoadResourceFromURI(path)
@@ -142,7 +142,7 @@ func LocalFileToMemory(fileName string, MyApp MyApp) []byte {
 	return file.Content()
 }
 
-func DownloadFromServer(MyApp MyApp) {
+func DownloadFromServer(MyApp *MyApp) {
 	files := []string{"Game.json", "Game-Platform.json", "Movie.json", "Movie-Genre.json", "Show.json"}
 
 	for _, v := range files {
@@ -150,7 +150,7 @@ func DownloadFromServer(MyApp MyApp) {
 	}
 }
 
-func UploadToServer(MyApp MyApp) {
+func UploadToServer(MyApp *MyApp) {
 	files := []string{"Game.json", "Game-Platform.json", "Movie.json", "Movie-Genre.json", "Show.json"}
 
 	for _, v := range files {
@@ -158,7 +158,7 @@ func UploadToServer(MyApp MyApp) {
 	}
 }
 
-func ChangeServer(MyApp MyApp, err error, popup *widget.PopUp, ip string, port string, callback func(MyApp)) {
+func ChangeServer(MyApp *MyApp, err error, popup *widget.PopUp, ip string, port string, callback func(*MyApp)) {
 	if !popup.Hidden {
 		popup.Hide()
 	}
@@ -171,6 +171,8 @@ func ChangeServer(MyApp MyApp, err error, popup *widget.PopUp, ip string, port s
 
 		if FileConflictCheck(MyApp) {
 			callback(MyApp)
+		} else {
+			MyApp.App.Preferences().SetString("StorageMode", "Sync")
 		}
 	}
 }

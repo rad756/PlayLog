@@ -22,6 +22,6 @@ func main() {
 
 	logic.Ini(MyApp)
 
-	ui.LoadGUI(*MyApp)
+	ui.LoadGUI(MyApp)
 	MyApp.Win.ShowAndRun()
 }

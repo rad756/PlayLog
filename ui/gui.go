@@ -14,7 +14,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func LoadGUI(MyApp logic.MyApp) {
+func LoadGUI(MyApp *logic.MyApp) {
 	if MyApp.App.Preferences().Bool("FirstRun") {
 		LoadSetupUI(MyApp)
 		return
@@ -28,7 +28,7 @@ func LoadGUI(MyApp logic.MyApp) {
 	BootSyncingUI(MyApp)
 }
 
-func BootSyncingUI(MyApp logic.MyApp) {
+func BootSyncingUI(MyApp *logic.MyApp) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 
 	go logic.IsServerAccessibleBoot(MyApp, ctx, cancel, LoadMenuAfterServerBootCheck)
@@ -48,7 +48,7 @@ func BootSyncingUI(MyApp logic.MyApp) {
 	MyApp.Win.SetContent(content)
 }
 
-func LoadMainUI(MyApp logic.MyApp) {
+func LoadMainUI(MyApp *logic.MyApp) {
 	gameTab := &TabAlpha{Name: "Game", Kind: "Platform", ID: -1}
 	gameKind := logic.ReadAlphaKind("Game-Platform", MyApp)
 	movieTab := &TabAlpha{Name: "Movie", Kind: "Genre", ID: -1}
@@ -64,7 +64,7 @@ func LoadMainUI(MyApp logic.MyApp) {
 	MyApp.Win.SetContent(content)
 }
 
-func LoadStartUpServerError(MyApp logic.MyApp) {
+func LoadStartUpServerError(MyApp *logic.MyApp) {
 	topLbl := widget.NewLabel("-- Startup Error --")
 	topContent := container.New(layout.NewCenterLayout(), topLbl)
 	errorLbl := widget.NewLabel("Server with IP " + MyApp.App.Preferences().String("IP") + " is inaccessible\nThe app will start in Desync Mode and try to sync upon next startup\nOr you can try to enter Sync Mode by pressing Switch Mode in Settings")
@@ -79,7 +79,7 @@ func LoadStartUpServerError(MyApp logic.MyApp) {
 	MyApp.Win.SetContent(content)
 }
 
-func LoadSyncUI(MyApp logic.MyApp) {
+func LoadSyncUI(MyApp *logic.MyApp) {
 	errorLbl := widget.NewLabel("-- Sync Error --")
 	errorCentered := container.NewCenter(errorLbl)
 	questionLbl := widget.NewLabel("Do you want to download server files OR upload local files to server?")
@@ -103,7 +103,7 @@ func LoadSyncUI(MyApp logic.MyApp) {
 	MyApp.Win.SetContent(content)
 }
 
-func ShowServerInaccessibleError(MyApp logic.MyApp) {
+func ShowServerInaccessibleError(MyApp *logic.MyApp) {
 	var errorPpu *widget.PopUp
 
 	errorLbl := widget.NewLabel(fmt.Sprintf("Server with IP: %s:%s is inaccessible", MyApp.App.Preferences().String("IP"), MyApp.App.Preferences().String("Port")))
@@ -152,7 +152,7 @@ func ShowServerInaccessibleError(MyApp logic.MyApp) {
 	errorPpu.Show()
 }
 
-func LoadMenuAfterServerBootCheck(MyApp logic.MyApp, err error) {
+func LoadMenuAfterServerBootCheck(MyApp *logic.MyApp, err error) {
 	if err != nil {
 		MyApp.App.Preferences().SetString("StorageMode", "Desync")
 		dialog.ShowError(fmt.Errorf("Cannot connect to server, entered Desync mode!"), MyApp.Win)
@@ -164,7 +164,7 @@ func LoadMenuAfterServerBootCheck(MyApp logic.MyApp, err error) {
 	}
 }
 
-func GetLoadingPopUp(MyApp logic.MyApp, cancel context.CancelFunc) *widget.PopUp {
+func GetLoadingPopUp(MyApp *logic.MyApp, cancel context.CancelFunc) *widget.PopUp {
 	var popup *widget.PopUp
 	lbl := widget.NewLabel("Checking server...")
 	centeredLbl := container.NewCenter(lbl)
@@ -181,7 +181,7 @@ func GetLoadingPopUp(MyApp logic.MyApp, cancel context.CancelFunc) *widget.PopUp
 	return popup
 }
 
-func GetServerCheckPopUp(MyApp logic.MyApp, cancel context.CancelFunc) *widget.PopUp {
+func GetServerCheckPopUp(MyApp *logic.MyApp, cancel context.CancelFunc) *widget.PopUp {
 	var popup *widget.PopUp
 	checkLbl := widget.NewLabel("Checking if server is accessible...")
 	centeredChecklbl := container.NewCenter(checkLbl)

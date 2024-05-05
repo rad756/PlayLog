@@ -22,7 +22,7 @@ type TabBeta struct {
 	ID       int
 }
 
-func NewTabBeta(betaSlice *logic.BetaSlice, MyApp logic.MyApp, tabBeta TabBeta) fyne.CanvasObject {
+func NewTabBeta(betaSlice *logic.BetaSlice, MyApp *logic.MyApp, tabBeta TabBeta) fyne.CanvasObject {
 	var currentLbl *widget.Label
 	var finishedLbl *widget.Label
 

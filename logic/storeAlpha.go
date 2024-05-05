@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne/v2/storage"
 )
 
-func ReadAlphaSlice(name string, MyApp MyApp) *AlphaSlice {
+func ReadAlphaSlice(name string, MyApp *MyApp) *AlphaSlice {
 	name = name + ".json"
 	path, _ := storage.Child(MyApp.App.Storage().RootURI(), name)
 
@@ -19,7 +19,7 @@ func ReadAlphaSlice(name string, MyApp MyApp) *AlphaSlice {
 	return as
 }
 
-func SaveAlphaSlice(name string, MyApp MyApp, as AlphaSlice) {
+func SaveAlphaSlice(name string, MyApp *MyApp, as AlphaSlice) {
 	name = name + ".json"
 	path, _ := storage.Child(MyApp.App.Storage().RootURI(), name)
 
@@ -34,7 +34,7 @@ func SaveAlphaSlice(name string, MyApp MyApp, as AlphaSlice) {
 	}
 }
 
-func ReadAlphaKind(name string, MyApp MyApp) *Kind {
+func ReadAlphaKind(name string, MyApp *MyApp) *Kind {
 	name = name + ".json"
 	path, _ := storage.Child(MyApp.App.Storage().RootURI(), name)
 
@@ -47,7 +47,7 @@ func ReadAlphaKind(name string, MyApp MyApp) *Kind {
 	return k
 }
 
-func SaveAlphaKind(name string, MyApp MyApp, k Kind) {
+func SaveAlphaKind(name string, MyApp *MyApp, k Kind) {
 	name = name + ".json"
 	path, _ := storage.Child(MyApp.App.Storage().RootURI(), name)
 

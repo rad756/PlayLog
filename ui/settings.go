@@ -14,7 +14,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func MakeSettingsTab(MyApp logic.MyApp) fyne.CanvasObject {
+func MakeSettingsTab(MyApp *logic.MyApp) fyne.CanvasObject {
 	var changeIPEnt *widget.Entry
 	var changePortEnt *widget.Entry
 	ModeBind := binding.BindPreferenceString("StorageMode", MyApp.App.Preferences())

@@ -25,7 +25,7 @@ func NewBetaSlice() *BetaSlice {
 	return &BetaSlice{}
 }
 
-func (bs *BetaSlice) AddBeta(Name string, Count string, SubCount string, Finished bool, MyApp MyApp, tabName string) *BetaSlice {
+func (bs *BetaSlice) AddBeta(Name string, Count string, SubCount string, Finished bool, MyApp *MyApp, tabName string) *BetaSlice {
 	CountInt, _ := strconv.Atoi(Count)
 	SubCountInt, _ := strconv.Atoi(SubCount)
 	bs.Slice = append(bs.Slice, *NewBeta(Name, CountInt, SubCountInt, Finished))
@@ -45,7 +45,7 @@ func (bs *BetaSlice) order() *BetaSlice {
 	return bs
 }
 
-func (bs *BetaSlice) DeleteBeta(id int, MyApp MyApp, tabName string) {
+func (bs *BetaSlice) DeleteBeta(id int, MyApp *MyApp, tabName string) {
 	if id >= 0 {
 		bs.Slice = append(bs.Slice[:id], bs.Slice[id+1:]...)
 	}

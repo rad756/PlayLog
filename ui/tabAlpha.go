@@ -20,7 +20,7 @@ type TabAlpha struct {
 	MultiKind bool
 }
 
-func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAlpha, kind *logic.Kind) fyne.CanvasObject {
+func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp *logic.MyApp, tabAlpha TabAlpha, kind *logic.Kind) fyne.CanvasObject {
 	var finishedCountLbl *widget.Label
 	tabAlpha.MultiKind = false
 
@@ -149,7 +149,7 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp logic.MyApp, tabAlpha TabAl
 	return tab
 }
 
-func makeChangeKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *widget.Select) {
+func makeChangeKindPopUp(MyApp *logic.MyApp, ta TabAlpha, k *logic.Kind, tks *widget.Select) {
 	var tabKindPopUp *widget.PopUp
 	var kindSel *widget.Select
 
@@ -199,7 +199,7 @@ func makeChangeKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *wid
 	tabKindPopUp.Show()
 }
 
-func makeMoreKindPopUp(MyApp logic.MyApp, ta TabAlpha, k *logic.Kind, tks *widget.Select, tabAlpha TabAlpha, oldSelection string) {
+func makeMoreKindPopUp(MyApp *logic.MyApp, ta TabAlpha, k *logic.Kind, tks *widget.Select, tabAlpha TabAlpha, oldSelection string) {
 	var moreKindPopUP *widget.PopUp
 	var checkGroup *widget.CheckGroup
 	var selectedKind []string

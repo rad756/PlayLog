@@ -12,7 +12,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func LoadSetupUI(MyApp logic.MyApp) {
+func LoadSetupUI(MyApp *logic.MyApp) {
 	questionLbl := widget.NewLabel("Select which mode app will run in, Local or Server Sync")
 	localBtn := widget.NewButton("Local Setup", func() {
 		MyApp.App.Preferences().SetString("StorageMode", "Local")

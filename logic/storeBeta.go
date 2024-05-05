@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne/v2/storage"
 )
 
-func ReadBetaSlice(name string, MyApp MyApp) *BetaSlice {
+func ReadBetaSlice(name string, MyApp *MyApp) *BetaSlice {
 	name = name + ".json"
 	path, _ := storage.Child(MyApp.App.Storage().RootURI(), name)
 
@@ -19,7 +19,7 @@ func ReadBetaSlice(name string, MyApp MyApp) *BetaSlice {
 	return bs
 }
 
-func SaveBetaSlice(name string, MyApp MyApp, bs BetaSlice) {
+func SaveBetaSlice(name string, MyApp *MyApp, bs BetaSlice) {
 	name = name + ".json"
 	path, _ := storage.Child(MyApp.App.Storage().RootURI(), name)
 
