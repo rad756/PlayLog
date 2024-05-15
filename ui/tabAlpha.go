@@ -1,9 +1,11 @@
 package ui
 
 import (
+	"context"
 	"fmt"
 	"playlog/logic"
 	"strings"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -63,16 +65,36 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp *logic.MyApp, tabAlpha TabA
 
 		if len(errStr) != 0 {
 			dialog.ShowError(logic.BuildError(errStr), MyApp.Win)
-		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
-			ShowServerInaccessibleError(MyApp)
-		} else {
-			alphaSlice.AddAlpha(nameEnt.Text, kindSel.Selected, MyApp, tabAlpha.Name)
-			tabAlpha.ID = -1
-			lst.UnselectAll()
-			lst.Refresh()
-			finishedCountLbl.SetText(fmt.Sprintf("%d %ss Finished", len(alphaSlice.Slice), tabAlpha.Name))
+			return
 		}
 
+		if MyApp.App.Preferences().String("StorageMode") == "Sync" {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+			popup := GetLoadingPopUpGR(MyApp, cancel)
+
+			go logic.IsServerAccessibleGR(MyApp, ctx, cancel, popup)
+			time.Sleep(100 * time.Millisecond)
+			select {
+			case <-ctx.Done():
+				//do not load popup after delay
+			default:
+				popup.Show()
+			}
+
+			//If popup is not hidden, this will stop code execution until popup is hidden
+			if !popup.Hidden {
+				select {
+				case <-ctx.Done():
+				}
+			}
+		}
+
+		alphaSlice.AddAlpha(nameEnt.Text, kindSel.Selected, MyApp, tabAlpha.Name)
+		tabAlpha.ID = -1
+		lst.UnselectAll()
+		lst.Refresh()
+		finishedCountLbl.SetText(fmt.Sprintf("%d %ss Finished", len(alphaSlice.Slice), tabAlpha.Name))
 	})
 
 	changeBtn := widget.NewButton("Change Selected "+tabAlpha.Name, func() {

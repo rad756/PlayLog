@@ -181,6 +181,28 @@ func GetLoadingPopUp(MyApp *logic.MyApp, cancel context.CancelFunc) *widget.PopU
 	return popup
 }
 
+func GetLoadingPopUpGR(MyApp *logic.MyApp, cancel context.CancelFunc) *widget.PopUp {
+	var popup *widget.PopUp
+	lbl := widget.NewLabel("Checking server...")
+	centeredLbl := container.NewCenter(lbl)
+	pg := widget.NewProgressBarInfinite()
+	lbl2 := widget.NewLabel("If you cancel, change will be made locally")
+	centeredLbl2 := container.NewCenter(lbl2)
+	btn := widget.NewButton("Cancel Check and Enter Desync Mode", func() {
+		cancel()
+		MyApp.App.Preferences().SetString("StorageMode", "Desync")
+		popup.Hide()
+	})
+
+	vbox := container.NewVBox(centeredLbl2, btn)
+
+	content := container.NewBorder(centeredLbl, vbox, nil, nil, pg)
+	popup = widget.NewModalPopUp(content, MyApp.Win.Canvas())
+	popup.Resize(fyne.NewSize(200, 0))
+
+	return popup
+}
+
 func GetServerCheckPopUp(MyApp *logic.MyApp, cancel context.CancelFunc) *widget.PopUp {
 	var popup *widget.PopUp
 	checkLbl := widget.NewLabel("Checking if server is accessible...")

@@ -40,6 +40,28 @@ func ContainsComma(s string) bool {
 	return strings.Contains(s, ",")
 }
 
+func IsServerAccessibleGR(MyApp *MyApp, ctx context.Context, cancel context.CancelFunc, popup *widget.PopUp) {
+	defer cancel()
+
+	ip := MyApp.App.Preferences().String("IP")
+	port := MyApp.App.Preferences().String("Port")
+
+	d := &net.Dialer{}
+
+	_, err := d.DialContext(ctx, "tcp", ip+":"+port)
+
+	//If errored will hide popup, if not hidden already
+	if !popup.Hidden {
+		popup.Hide()
+	}
+
+	if err != nil {
+		MyApp.App.Preferences().SetString("StorageMode", "Desync")
+		dialog.ShowError(fmt.Errorf("Your change has been saved locally and entered desync mode!"), MyApp.Win)
+		return
+	}
+}
+
 func IsServerAccessibleBoot(MyApp *MyApp, ctx context.Context, cancel context.CancelFunc, callback func(*MyApp, error)) {
 	defer cancel()
 
