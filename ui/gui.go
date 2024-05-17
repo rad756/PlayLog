@@ -160,6 +160,7 @@ func LoadMenuAfterServerBootCheck(MyApp *logic.MyApp, err error) {
 	} else if logic.FileConflictCheck(MyApp) {
 		LoadSyncUI(MyApp)
 	} else {
+		MyApp.App.Preferences().SetString("StorageMode", "Sync")
 		LoadMainUI(MyApp)
 	}
 }
