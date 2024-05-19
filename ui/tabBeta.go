@@ -88,16 +88,16 @@ func NewTabBeta(betaSlice *logic.BetaSlice, MyApp *logic.MyApp, tabBeta TabBeta)
 
 		if len(errStr) != 0 {
 			dialog.ShowError(logic.BuildError(errStr), MyApp.Win)
-		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
-			ShowServerInaccessibleError(MyApp)
-		} else {
-			betaSlice.AddBeta(nameEnt.Text, countEnt.Text, subCountEnt.Text, finishedCck.Checked, MyApp, tabBeta.Name)
-			tabBeta.ID = -1
-			lst.UnselectAll()
-			lst.Refresh()
-			currentLbl.SetText(fmt.Sprintf("Currently %sing: %d %ss", tabBeta.Action, betaSlice.CountCurrent(), tabBeta.Name))
-			finishedLbl.SetText(fmt.Sprintf("Finished %sing: %d %ss", tabBeta.Action, betaSlice.CountFinished(), tabBeta.Name))
 		}
+
+		CheckServer(MyApp)
+
+		betaSlice.AddBeta(nameEnt.Text, countEnt.Text, subCountEnt.Text, finishedCck.Checked, MyApp, tabBeta.Name)
+		tabBeta.ID = -1
+		lst.UnselectAll()
+		lst.Refresh()
+		currentLbl.SetText(fmt.Sprintf("Currently %sing: %d %ss", tabBeta.Action, betaSlice.CountCurrent(), tabBeta.Name))
+		finishedLbl.SetText(fmt.Sprintf("Finished %sing: %d %ss", tabBeta.Action, betaSlice.CountFinished(), tabBeta.Name))
 	})
 
 	changeBtn := widget.NewButton("Change Selected "+tabBeta.Name, func() {
@@ -118,16 +118,16 @@ func NewTabBeta(betaSlice *logic.BetaSlice, MyApp *logic.MyApp, tabBeta TabBeta)
 
 		if len(errStr) != 0 {
 			dialog.ShowError(logic.BuildError(errStr), MyApp.Win)
-		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
-			ShowServerInaccessibleError(MyApp)
-		} else {
-			betaSlice.DeleteBeta(tabBeta.ID, MyApp, tabBeta.Name)
-			betaSlice.AddBeta(nameEnt.Text, countEnt.Text, subCountEnt.Text, finishedCck.Checked, MyApp, tabBeta.Name)
-			lst.UnselectAll()
-			lst.Refresh()
-			currentLbl.SetText(fmt.Sprintf("Currently %sing: %d %ss", tabBeta.Action, betaSlice.CountCurrent(), tabBeta.Name))
-			finishedLbl.SetText(fmt.Sprintf("Finished %sing: %d %ss", tabBeta.Action, betaSlice.CountFinished(), tabBeta.Name))
 		}
+
+		CheckServer(MyApp)
+
+		betaSlice.DeleteBeta(tabBeta.ID, MyApp, tabBeta.Name)
+		betaSlice.AddBeta(nameEnt.Text, countEnt.Text, subCountEnt.Text, finishedCck.Checked, MyApp, tabBeta.Name)
+		lst.UnselectAll()
+		lst.Refresh()
+		currentLbl.SetText(fmt.Sprintf("Currently %sing: %d %ss", tabBeta.Action, betaSlice.CountCurrent(), tabBeta.Name))
+		finishedLbl.SetText(fmt.Sprintf("Finished %sing: %d %ss", tabBeta.Action, betaSlice.CountFinished(), tabBeta.Name))
 	})
 
 	currentLbl = widget.NewLabel(fmt.Sprintf("Currently %sing: %d %ss", tabBeta.Action, betaSlice.CountCurrent(), tabBeta.Name))
@@ -138,16 +138,16 @@ func NewTabBeta(betaSlice *logic.BetaSlice, MyApp *logic.MyApp, tabBeta TabBeta)
 	deleteBtn := widget.NewButton("Delete Selected "+tabBeta.Name, func() {
 		if tabBeta.ID == -1 {
 			dialog.ShowError(fmt.Errorf("No %s was selected to be deleted", strings.ToLower(tabBeta.Name)), MyApp.Win)
-		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
-			ShowServerInaccessibleError(MyApp)
-		} else {
-			betaSlice.DeleteBeta(tabBeta.ID, MyApp, tabBeta.Name)
-			tabBeta.ID = -1
-			lst.UnselectAll()
-			lst.Refresh()
-			currentLbl.SetText(fmt.Sprintf("Currently %sing: %d %ss", tabBeta.Action, betaSlice.CountCurrent(), tabBeta.Name))
-			finishedLbl.SetText(fmt.Sprintf("Finished %sing: %d %ss", tabBeta.Action, betaSlice.CountFinished(), tabBeta.Name))
 		}
+
+		CheckServer(MyApp)
+
+		betaSlice.DeleteBeta(tabBeta.ID, MyApp, tabBeta.Name)
+		tabBeta.ID = -1
+		lst.UnselectAll()
+		lst.Refresh()
+		currentLbl.SetText(fmt.Sprintf("Currently %sing: %d %ss", tabBeta.Action, betaSlice.CountCurrent(), tabBeta.Name))
+		finishedLbl.SetText(fmt.Sprintf("Finished %sing: %d %ss", tabBeta.Action, betaSlice.CountFinished(), tabBeta.Name))
 	})
 
 	lst.OnSelected = func(id widget.ListItemID) {

@@ -239,3 +239,27 @@ func GetServerCheckPopUp(MyApp *logic.MyApp, cancel context.CancelFunc) *widget.
 	popup.Resize(fyne.NewSize(200, 0))
 	return popup
 }
+
+func CheckServer(MyApp *logic.MyApp) {
+	if MyApp.App.Preferences().String("StorageMode") == "Sync" {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+		popup := GetLoadingPopUpGR(MyApp, cancel)
+
+		go logic.IsServerAccessibleGR(MyApp, ctx, cancel, popup)
+		time.Sleep(100 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			//do not load popup after delay
+		default:
+			popup.Show()
+		}
+
+		//If popup is not hidden, this will stop code execution until popup is hidden
+		if !popup.Hidden {
+			select {
+			case <-ctx.Done():
+			}
+		}
+	}
+}

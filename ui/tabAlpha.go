@@ -1,11 +1,9 @@
 package ui
 
 import (
-	"context"
 	"fmt"
 	"playlog/logic"
 	"strings"
-	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -68,27 +66,7 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp *logic.MyApp, tabAlpha TabA
 			return
 		}
 
-		if MyApp.App.Preferences().String("StorageMode") == "Sync" {
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-
-			popup := GetLoadingPopUpGR(MyApp, cancel)
-
-			go logic.IsServerAccessibleGR(MyApp, ctx, cancel, popup)
-			time.Sleep(100 * time.Millisecond)
-			select {
-			case <-ctx.Done():
-				//do not load popup after delay
-			default:
-				popup.Show()
-			}
-
-			//If popup is not hidden, this will stop code execution until popup is hidden
-			if !popup.Hidden {
-				select {
-				case <-ctx.Done():
-				}
-			}
-		}
+		CheckServer(MyApp)
 
 		alphaSlice.AddAlpha(nameEnt.Text, kindSel.Selected, MyApp, tabAlpha.Name)
 		tabAlpha.ID = -1
@@ -109,16 +87,16 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp *logic.MyApp, tabAlpha TabA
 
 		if len(errStr) != 0 {
 			dialog.ShowError(logic.BuildError(errStr), MyApp.Win)
-		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
-			ShowServerInaccessibleError(MyApp)
-		} else {
-			alphaSlice.DeleteAlpha(tabAlpha.ID, MyApp, tabAlpha.Name)
-			alphaSlice.AddAlpha(nameEnt.Text, kindSel.Selected, MyApp, tabAlpha.Name)
-			tabAlpha.ID = -1
-			lst.UnselectAll()
-			lst.Refresh()
-			finishedCountLbl.SetText(fmt.Sprintf("%d %ss Finished", len(alphaSlice.Slice), tabAlpha.Name))
 		}
+
+		CheckServer(MyApp)
+
+		alphaSlice.DeleteAlpha(tabAlpha.ID, MyApp, tabAlpha.Name)
+		alphaSlice.AddAlpha(nameEnt.Text, kindSel.Selected, MyApp, tabAlpha.Name)
+		tabAlpha.ID = -1
+		lst.UnselectAll()
+		lst.Refresh()
+		finishedCountLbl.SetText(fmt.Sprintf("%d %ss Finished", len(alphaSlice.Slice), tabAlpha.Name))
 	})
 
 	changeKindBtn := widget.NewButton(fmt.Sprintf("Change %ss", tabAlpha.Kind), func() { makeChangeKindPopUp(MyApp, tabAlpha, kind, kindSel) })
@@ -129,15 +107,15 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp *logic.MyApp, tabAlpha TabA
 	deleteBtn := widget.NewButton("Delete Selected "+tabAlpha.Name, func() {
 		if tabAlpha.ID == -1 {
 			dialog.ShowError(fmt.Errorf("No %s was selected to be deleted", strings.ToLower(tabAlpha.Name)), MyApp.Win)
-		} else if logic.IsInSyncModeAndServerInaccessible(MyApp) {
-			ShowServerInaccessibleError(MyApp)
-		} else {
-			alphaSlice.DeleteAlpha(tabAlpha.ID, MyApp, tabAlpha.Name)
-			tabAlpha.ID = -1
-			lst.UnselectAll()
-			lst.Refresh()
-			finishedCountLbl.SetText(fmt.Sprintf("%d %ss Finished", len(alphaSlice.Slice), tabAlpha.Name))
 		}
+
+		CheckServer(MyApp)
+
+		alphaSlice.DeleteAlpha(tabAlpha.ID, MyApp, tabAlpha.Name)
+		tabAlpha.ID = -1
+		lst.UnselectAll()
+		lst.Refresh()
+		finishedCountLbl.SetText(fmt.Sprintf("%d %ss Finished", len(alphaSlice.Slice), tabAlpha.Name))
 	})
 
 	lst.OnSelected = func(id widget.ListItemID) {
@@ -192,6 +170,8 @@ func makeChangeKindPopUp(MyApp *logic.MyApp, ta TabAlpha, k *logic.Kind, tks *wi
 			return
 		}
 
+		CheckServer(MyApp)
+
 		k.AddKind(tabKindEnt.Text, (ta.Name + "-" + ta.Kind), MyApp)
 
 		kindSel.Options = k.Slice
@@ -204,6 +184,8 @@ func makeChangeKindPopUp(MyApp *logic.MyApp, ta TabAlpha, k *logic.Kind, tks *wi
 			dialog.ShowError(fmt.Errorf("Need to select %s to delete", ta.Kind), MyApp.Win)
 			return
 		} else {
+			CheckServer(MyApp)
+
 			k.DeleteKind(kindSel.SelectedIndex(), (ta.Name + "-" + ta.Kind), MyApp)
 			kindSel.Options = k.Slice
 			kindSel.ClearSelected()
