@@ -88,6 +88,14 @@ func LoadSyncUI(MyApp *logic.MyApp) {
 	serverFilesBtn := widget.NewButton("Download Server Files", func() {
 		logic.DownloadFromServer(MyApp)
 		MyApp.App.Preferences().SetString("StorageMode", "Sync")
+		for {
+			if MyApp.App.Preferences().String("StorageMode") != "Sync" {
+				MyApp.App.Preferences().SetString("StorageMode", "Sync")
+				fmt.Println("BUG: StorageMode was not set")
+			} else {
+				break
+			}
+		}
 		LoadMainUI(MyApp)
 	})
 	orLbl := widget.NewLabel("OR")
@@ -95,6 +103,14 @@ func LoadSyncUI(MyApp *logic.MyApp) {
 	localFilesBtn := widget.NewButton("Upload Local Files", func() {
 		logic.UploadToServer(MyApp)
 		MyApp.App.Preferences().SetString("StorageMode", "Sync")
+		for {
+			if MyApp.App.Preferences().String("StorageMode") != "Sync" {
+				MyApp.App.Preferences().SetString("StorageMode", "Sync")
+				fmt.Println("BUG: StorageMode was not set")
+			} else {
+				break
+			}
+		}
 		LoadMainUI(MyApp)
 	})
 
