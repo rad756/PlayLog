@@ -23,6 +23,7 @@ type TabAlpha struct {
 func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp *logic.MyApp, tabAlpha TabAlpha, kind *logic.Kind) fyne.CanvasObject {
 	var finishedCountLbl *widget.Label
 	tabAlpha.MultiKind = false
+	tabAlpha.ID = -1
 
 	lst := widget.NewList(
 		func() int {
@@ -263,4 +264,13 @@ func makeMoreKindPopUp(MyApp *logic.MyApp, ta TabAlpha, k *logic.Kind, tks *widg
 	moreKindPopUP = widget.NewModalPopUp(content, MyApp.Win.Canvas())
 	moreKindPopUP.Resize(fyne.NewSize(250, 350))
 	moreKindPopUP.Show()
+}
+
+func IsTabAlpha(t interface{}) bool {
+	switch t.(type) {
+	case TabAlpha:
+		return true
+	default:
+		return false
+	}
 }

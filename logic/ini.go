@@ -7,8 +7,9 @@ import (
 )
 
 type MyApp struct {
-	App fyne.App
-	Win fyne.Window
+	App  fyne.App
+	Win  fyne.Window
+	Tabs []Tab
 }
 
 func Ini(MyApp *MyApp) {
@@ -19,13 +20,11 @@ func Ini(MyApp *MyApp) {
 	}
 
 	if MyApp.App.Preferences().Bool("FirstRun") {
-		SaveAlphaSlice("Game", MyApp, AlphaSlice{})
-		SaveAlphaSlice("Game-Platform", MyApp, AlphaSlice{})
-		SaveAlphaSlice("Movie", MyApp, AlphaSlice{})
-		SaveAlphaSlice("Movie-Genre", MyApp, AlphaSlice{})
-		SaveBetaSlice("Show", MyApp, BetaSlice{})
+		CreateTabsFile(MyApp)
 		MyApp.App.Preferences().SetFloat("GlobalOffset", 0.6)
 	}
+
+	GetTabs(MyApp)
 }
 
 func ServerSetup(ip string, port string, mode string, MyApp *MyApp) {
@@ -36,7 +35,23 @@ func ServerSetup(ip string, port string, mode string, MyApp *MyApp) {
 
 // Checks if local and server files are different, returns true if conflict
 func FileConflictCheck(MyApp *MyApp) bool {
-	files := []string{"Game.json", "Game-Platform.json", "Movie.json", "Movie-Genre.json", "Show.json"}
+	files := []string{}
+	if TabConflictCheck(MyApp) {
+		return true
+	}
+
+	Download("Tabs.json", MyApp)
+
+	for _, v := range MyApp.Tabs {
+		if v.Mode == "Alpha" {
+			files = append(files, v.Name+".json")
+			files = append(files, v.Name+"-"+v.Kind+".json")
+		} else if v.Mode == "Beta" {
+			files = append(files, v.Name+".json")
+		}
+
+	}
+
 	filesDownloaded := [][]byte{}
 	filesRead := [][]byte{}
 
@@ -51,4 +66,16 @@ func FileConflictCheck(MyApp *MyApp) bool {
 		return true
 	}
 
+}
+
+// Checks if local and server tab are different, returns true if conflict
+func TabConflictCheck(MyApp *MyApp) bool {
+	serverTab := DownloadToMemory("Tabs.json", MyApp)
+	localTab := LocalFileToMemory("Tabs.json", MyApp)
+
+	if reflect.DeepEqual(serverTab, localTab) {
+		return false
+	} else {
+		return true
+	}
 }

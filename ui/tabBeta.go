@@ -18,13 +18,13 @@ type TabBeta struct {
 	Name     string
 	Count    string
 	SubCount string
-	Action   string
 	ID       int
 }
 
 func NewTabBeta(betaSlice *logic.BetaSlice, MyApp *logic.MyApp, tabBeta TabBeta) fyne.CanvasObject {
 	var currentLbl *widget.Label
 	var finishedLbl *widget.Label
+	tabBeta.ID = -1
 
 	lst := widget.NewList(
 		func() int {
@@ -70,7 +70,7 @@ func NewTabBeta(betaSlice *logic.BetaSlice, MyApp *logic.MyApp, tabBeta TabBeta)
 		subCountEnt.Refresh()
 	})
 
-	finishedCck := widget.NewCheck(fmt.Sprintf("Finished %sing", tabBeta.Action), func(value bool) {})
+	finishedCck := widget.NewCheck("Finished", func(value bool) {})
 	centeredFinishedCck := container.NewCenter(finishedCck)
 
 	addBtn := widget.NewButton("Add "+tabBeta.Name, func() {
@@ -96,8 +96,8 @@ func NewTabBeta(betaSlice *logic.BetaSlice, MyApp *logic.MyApp, tabBeta TabBeta)
 		tabBeta.ID = -1
 		lst.UnselectAll()
 		lst.Refresh()
-		currentLbl.SetText(fmt.Sprintf("Currently %sing: %d %ss", tabBeta.Action, betaSlice.CountCurrent(), tabBeta.Name))
-		finishedLbl.SetText(fmt.Sprintf("Finished %sing: %d %ss", tabBeta.Action, betaSlice.CountFinished(), tabBeta.Name))
+		currentLbl.SetText(fmt.Sprintf("Current %ss: %d", tabBeta.Name, betaSlice.CountCurrent()))
+		finishedLbl.SetText(fmt.Sprintf("Finished %ss: %d", tabBeta.Name, betaSlice.CountFinished()))
 	})
 
 	changeBtn := widget.NewButton("Change Selected "+tabBeta.Name, func() {
@@ -126,13 +126,13 @@ func NewTabBeta(betaSlice *logic.BetaSlice, MyApp *logic.MyApp, tabBeta TabBeta)
 		betaSlice.AddBeta(nameEnt.Text, countEnt.Text, subCountEnt.Text, finishedCck.Checked, MyApp, tabBeta.Name)
 		lst.UnselectAll()
 		lst.Refresh()
-		currentLbl.SetText(fmt.Sprintf("Currently %sing: %d %ss", tabBeta.Action, betaSlice.CountCurrent(), tabBeta.Name))
-		finishedLbl.SetText(fmt.Sprintf("Finished %sing: %d %ss", tabBeta.Action, betaSlice.CountFinished(), tabBeta.Name))
+		currentLbl.SetText(fmt.Sprintf("Current %ss: %d", tabBeta.Name, betaSlice.CountCurrent()))
+		finishedLbl.SetText(fmt.Sprintf("Finished %ss: %d", tabBeta.Name, betaSlice.CountFinished()))
 	})
 
-	currentLbl = widget.NewLabel(fmt.Sprintf("Currently %sing: %d %ss", tabBeta.Action, betaSlice.CountCurrent(), tabBeta.Name))
+	currentLbl = widget.NewLabel(fmt.Sprintf("Current %ss: %d", tabBeta.Name, betaSlice.CountCurrent()))
 	centeredCurrentLbl := container.NewCenter(currentLbl)
-	finishedLbl = widget.NewLabel(fmt.Sprintf("Finished %sing: %d %ss", tabBeta.Action, betaSlice.CountFinished(), tabBeta.Name))
+	finishedLbl = widget.NewLabel(fmt.Sprintf("Finished %ss: %d", tabBeta.Name, betaSlice.CountFinished()))
 	centeredFinishedLbl := container.NewCenter(finishedLbl)
 
 	deleteBtn := widget.NewButton("Delete Selected "+tabBeta.Name, func() {
@@ -146,8 +146,8 @@ func NewTabBeta(betaSlice *logic.BetaSlice, MyApp *logic.MyApp, tabBeta TabBeta)
 		tabBeta.ID = -1
 		lst.UnselectAll()
 		lst.Refresh()
-		currentLbl.SetText(fmt.Sprintf("Currently %sing: %d %ss", tabBeta.Action, betaSlice.CountCurrent(), tabBeta.Name))
-		finishedLbl.SetText(fmt.Sprintf("Finished %sing: %d %ss", tabBeta.Action, betaSlice.CountFinished(), tabBeta.Name))
+		currentLbl.SetText(fmt.Sprintf("Current %ss: %d", tabBeta.Name, betaSlice.CountCurrent()))
+		finishedLbl.SetText(fmt.Sprintf("Finished %ss: %d", tabBeta.Name, betaSlice.CountFinished()))
 	})
 
 	lst.OnSelected = func(id widget.ListItemID) {

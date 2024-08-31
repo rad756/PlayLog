@@ -10,7 +10,7 @@ import (
 
 func main() {
 	MyApp := &logic.MyApp{App: app.New()}
-	MyApp.Win = MyApp.App.NewWindow("Playlog")
+	MyApp.Win = MyApp.App.NewWindow("PlayLog")
 
 	if MyApp.App.Metadata().Release {
 		MyApp.App = app.NewWithID("com.github.rad756.playlog")

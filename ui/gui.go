@@ -20,6 +20,11 @@ func LoadGUI(MyApp *logic.MyApp) {
 		return
 	}
 
+	if len(MyApp.Tabs) == 0 {
+		LoadCreateTabUI(MyApp)
+		return
+	}
+
 	if MyApp.App.Preferences().String("StorageMode") == "Local" {
 		LoadMainUI(MyApp)
 		return
@@ -48,18 +53,39 @@ func BootSyncingUI(MyApp *logic.MyApp) {
 	MyApp.Win.SetContent(content)
 }
 
-func LoadMainUI(MyApp *logic.MyApp) {
-	gameTab := &TabAlpha{Name: "Game", Kind: "Platform", ID: -1}
-	gameKind := logic.ReadAlphaKind("Game-Platform", MyApp)
-	movieTab := &TabAlpha{Name: "Movie", Kind: "Genre", ID: -1}
-	movieKind := logic.ReadAlphaKind("Movie-Genre", MyApp)
-	showTab := &TabBeta{Name: "Show", Count: "Season", SubCount: "Episode", Action: "Watch", ID: -1}
+func MakeTab(id int, MyApp *logic.MyApp) *container.TabItem {
+	var tab *container.TabItem
+	if MyApp.Tabs[id].Mode == "Alpha" {
+		name := MyApp.Tabs[id].Name
+		kind := MyApp.Tabs[id].Kind
+		main := TabAlpha{Name: name, Kind: kind, ID: -1}
+		second := logic.ReadAlphaKind(name+"-"+kind, MyApp)
 
-	content := container.NewAppTabs(
-		container.NewTabItem("Games", NewTabAlpha(logic.ReadAlphaSlice(gameTab.Name, MyApp), MyApp, *gameTab, gameKind)),
-		container.NewTabItem("Movies", NewTabAlpha(logic.ReadAlphaSlice(movieTab.Name, MyApp), MyApp, *movieTab, movieKind)),
-		container.NewTabItem("Shows", NewTabBeta(logic.ReadBetaSlice(showTab.Name, MyApp), MyApp, *showTab)),
-		container.NewTabItem("Settings", MakeSettingsTab(MyApp)))
+		tab = container.NewTabItem(name+"s", NewTabAlpha(logic.ReadAlphaSlice(main.Name, MyApp), MyApp, main, second))
+	} else if MyApp.Tabs[id].Mode == "Beta" {
+		name := MyApp.Tabs[id].Name
+		count := MyApp.Tabs[id].Count
+		subCount := MyApp.Tabs[id].SubCount
+		main := TabBeta{Name: name, Count: count, SubCount: subCount, ID: -1}
+
+		tab = container.NewTabItem(name+"s", NewTabBeta(logic.ReadBetaSlice(main.Name, MyApp), MyApp, main))
+	}
+
+	return tab
+}
+
+func LoadMainUI(MyApp *logic.MyApp) {
+	var tabs []*container.TabItem
+
+	for i := 0; i < len(MyApp.Tabs); i++ {
+		tabs = append(tabs, MakeTab(i, MyApp))
+	}
+	tabs = append(tabs, container.NewTabItem("Settings", MakeSettingsTab(MyApp)))
+
+	content := container.NewAppTabs()
+	for i := 0; i < len(tabs); i++ {
+		content.Append(tabs[i])
+	}
 
 	MyApp.Win.SetContent(content)
 }

@@ -17,6 +17,9 @@ import (
 func MakeSettingsTab(MyApp *logic.MyApp) fyne.CanvasObject {
 	var changeIPEnt *widget.Entry
 	var changePortEnt *widget.Entry
+
+	editTabsBtn := widget.NewButton("Edit Tabs", func() { LoadCreateTabUI(MyApp) })
+
 	ModeBind := binding.BindPreferenceString("StorageMode", MyApp.App.Preferences())
 
 	currentModeLbl := widget.NewLabelWithData(binding.NewSprintf("Current mode: %s", ModeBind))
@@ -87,5 +90,5 @@ func MakeSettingsTab(MyApp *logic.MyApp) fyne.CanvasObject {
 		}
 	})
 
-	return container.NewVBox(currentModeLbl, switchModeBtn, currentIPLbl, currentPortLbl, centeredChangeServerLbl, changeIPEnt, changePortEnt, changeServerBtn)
+	return container.NewVBox(editTabsBtn, currentModeLbl, switchModeBtn, currentIPLbl, currentPortLbl, centeredChangeServerLbl, changeIPEnt, changePortEnt, changeServerBtn)
 }
