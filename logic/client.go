@@ -155,6 +155,8 @@ func DownloadFromServer(MyApp *MyApp) {
 
 	}
 
+	files = append(files, "Tabs.json")
+
 	for _, v := range files {
 		Download(v, MyApp)
 	}
@@ -172,6 +174,8 @@ func UploadToServer(MyApp *MyApp) {
 		}
 
 	}
+
+	files = append(files, "Tabs.json")
 
 	for _, v := range files {
 		Upload(LocalFileToMemory(v, MyApp), v, MyApp)
