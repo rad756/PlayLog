@@ -172,9 +172,31 @@ func NewTabBeta(betaSlice *logic.BetaSlice, MyApp *logic.MyApp, tabBeta TabBeta)
 	countBorder := container.NewBorder(nil, nil, lessCountBtn, moreCountBtn, countEnt)
 	subCountBorder := container.NewBorder(nil, nil, lessSubCountBtn, moreSubCountBtn, subCountEnt)
 
-	vbox := container.NewVBox(nameEnt, countBorder, subCountBorder, centeredFinishedCck, addBtn, layout.NewSpacer(), changeBtn, layout.NewSpacer(), centeredCurrentLbl, centeredFinishedLbl, layout.NewSpacer(), deleteBtn)
-	tab := container.NewHSplit(lst, vbox)
-	tab.Offset = MyApp.App.Preferences().Float("GlobalOffset")
+	if MyApp.Mobile {
+		mobileChangeBtn := widget.NewButton("Change "+tabBeta.Name+" List", func() {
+			makeMobileBetaChangePopUp(MyApp, nameEnt, countBorder, subCountBorder, centeredFinishedCck, addBtn, changeBtn, deleteBtn)
+		})
 
-	return tab
+		tab := container.NewBorder(nil, mobileChangeBtn, nil, nil, lst)
+
+		return tab
+	} else {
+		vbox := container.NewVBox(nameEnt, countBorder, subCountBorder, centeredFinishedCck, addBtn, layout.NewSpacer(), changeBtn, layout.NewSpacer(), centeredCurrentLbl, centeredFinishedLbl, layout.NewSpacer(), deleteBtn)
+		tab := container.NewHSplit(lst, vbox)
+		tab.Offset = MyApp.App.Preferences().Float("GlobalOffset")
+
+		return tab
+	}
+}
+
+func makeMobileBetaChangePopUp(MyApp *logic.MyApp, nameEnt fyne.Widget, countBorder *fyne.Container, subCountBorder *fyne.Container, centeredFinishedCck *fyne.Container, addBtn fyne.Widget, changeBtn fyne.Widget, deleteBtn fyne.Widget) {
+	var changeBetaPopUp *widget.PopUp
+
+	exitBtn := widget.NewButton("Exit", func() { changeBetaPopUp.Hide() })
+
+	content := container.NewVBox(nameEnt, countBorder, subCountBorder, centeredFinishedCck, addBtn, changeBtn, deleteBtn, exitBtn)
+
+	changeBetaPopUp = widget.NewModalPopUp(content, MyApp.Win.Canvas())
+	changeBetaPopUp.Resize(fyne.NewSize(250, 0))
+	changeBetaPopUp.Show()
 }

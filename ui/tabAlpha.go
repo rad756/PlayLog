@@ -147,7 +147,7 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp *logic.MyApp, tabAlpha TabA
 
 	if MyApp.Mobile {
 		mobileChangeBtn := widget.NewButton("Change "+tabAlpha.Name+" List", func() {
-			makeMobileChangePopUp(MyApp, nameEnt, kindBorder, addBtn, changeBtn, deleteBtn)
+			makeMobileAlphaChangePopUp(MyApp, nameEnt, kindBorder, addBtn, changeBtn, deleteBtn)
 		})
 
 		vbox := container.NewVBox(mobileChangeBtn, changeKindBtn)
@@ -163,16 +163,16 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp *logic.MyApp, tabAlpha TabA
 	}
 }
 
-func makeMobileChangePopUp(MyApp *logic.MyApp, nameEnt fyne.Widget, kindBorder *fyne.Container, addBtn fyne.Widget, changeBtn fyne.Widget, deleteBtn fyne.Widget) {
-	var changeAlphaPopUP *widget.PopUp
+func makeMobileAlphaChangePopUp(MyApp *logic.MyApp, nameEnt fyne.Widget, kindBorder *fyne.Container, addBtn fyne.Widget, changeBtn fyne.Widget, deleteBtn fyne.Widget) {
+	var changeAlphaPopUp *widget.PopUp
 
-	exitBtn := widget.NewButton("Exit", func() { changeAlphaPopUP.Hide() })
+	exitBtn := widget.NewButton("Exit", func() { changeAlphaPopUp.Hide() })
 
 	content := container.NewVBox(nameEnt, kindBorder, addBtn, changeBtn, layout.NewSpacer(), deleteBtn, layout.NewSpacer(), exitBtn)
 
-	changeAlphaPopUP = widget.NewModalPopUp(content, MyApp.Win.Canvas())
-	changeAlphaPopUP.Resize(fyne.NewSize(200, 0))
-	changeAlphaPopUP.Show()
+	changeAlphaPopUp = widget.NewModalPopUp(content, MyApp.Win.Canvas())
+	changeAlphaPopUp.Resize(fyne.NewSize(250, 0))
+	changeAlphaPopUp.Show()
 }
 
 func makeChangeKindPopUp(MyApp *logic.MyApp, ta TabAlpha, k *logic.Kind, tks *widget.Select) {
@@ -225,7 +225,7 @@ func makeChangeKindPopUp(MyApp *logic.MyApp, ta TabAlpha, k *logic.Kind, tks *wi
 	content := container.NewVBox(tabKindEnt, addKindBtn, kindSel, deleteKindBtn, layout.NewSpacer(), exitBtn)
 
 	tabKindPopUp = widget.NewModalPopUp(content, MyApp.Win.Canvas())
-	tabKindPopUp.Resize(fyne.NewSize(200, 0))
+	tabKindPopUp.Resize(fyne.NewSize(250, 0))
 	tabKindPopUp.Show()
 }
 
