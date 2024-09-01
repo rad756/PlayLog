@@ -143,6 +143,9 @@ func LocalFileToMemory(fileName string, MyApp *MyApp) []byte {
 }
 
 func DownloadFromServer(MyApp *MyApp) {
+	Download("Tabs.json", MyApp)
+	GetTabs(MyApp)
+
 	files := []string{}
 
 	for _, v := range MyApp.Tabs {
@@ -154,8 +157,6 @@ func DownloadFromServer(MyApp *MyApp) {
 		}
 
 	}
-
-	files = append(files, "Tabs.json")
 
 	for _, v := range files {
 		Download(v, MyApp)
@@ -164,6 +165,7 @@ func DownloadFromServer(MyApp *MyApp) {
 
 func UploadToServer(MyApp *MyApp) {
 	files := []string{}
+	files = append(files, "Tabs.json")
 
 	for _, v := range MyApp.Tabs {
 		if v.Mode == "Alpha" {
@@ -174,8 +176,6 @@ func UploadToServer(MyApp *MyApp) {
 		}
 
 	}
-
-	files = append(files, "Tabs.json")
 
 	for _, v := range files {
 		Upload(LocalFileToMemory(v, MyApp), v, MyApp)

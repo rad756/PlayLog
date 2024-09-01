@@ -54,7 +54,7 @@ func LoadSetupUI(MyApp *logic.MyApp) {
 		} else {
 			logic.ServerSetup(ip, port, "Sync", MyApp)
 			MyApp.App.Preferences().SetBool("FirstRun", false)
-			//Make if statement to check if tabs are created, if true go to main menu, if false go to create tab menu
+			logic.DownloadFromServer(MyApp)
 			LoadMainUI(MyApp)
 		}
 
