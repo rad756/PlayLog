@@ -22,8 +22,6 @@ func main() {
 
 	logic.Ini(MyApp)
 
-	MyApp.Mobile = true
-
 	ui.LoadGUI(MyApp)
 	MyApp.Win.ShowAndRun()
 }
