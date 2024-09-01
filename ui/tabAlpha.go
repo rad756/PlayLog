@@ -88,6 +88,7 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp *logic.MyApp, tabAlpha TabA
 
 		if len(errStr) != 0 {
 			dialog.ShowError(logic.BuildError(errStr), MyApp.Win)
+			return
 		}
 
 		CheckServer(MyApp)
@@ -108,6 +109,7 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp *logic.MyApp, tabAlpha TabA
 	deleteBtn := widget.NewButton("Delete Selected "+tabAlpha.Name, func() {
 		if tabAlpha.ID == -1 {
 			dialog.ShowError(fmt.Errorf("No %s was selected to be deleted", strings.ToLower(tabAlpha.Name)), MyApp.Win)
+			return
 		}
 
 		CheckServer(MyApp)
@@ -143,11 +145,34 @@ func NewTabAlpha(alphaSlice *logic.AlphaSlice, MyApp *logic.MyApp, tabAlpha TabA
 		}
 	}
 
-	vBox := container.NewVBox(nameEnt, kindBorder, addBtn, layout.NewSpacer(), changeBtn, changeKindBtn, layout.NewSpacer(), centeredFinishedCountLbl, layout.NewSpacer(), deleteBtn)
-	tab := container.NewHSplit(lst, vBox)
-	tab.Offset = MyApp.App.Preferences().Float("GlobalOffset")
+	if MyApp.Mobile {
+		mobileChangeBtn := widget.NewButton("Change "+tabAlpha.Name+" List", func() {
+			makeMobileChangePopUp(MyApp, nameEnt, kindBorder, addBtn, changeBtn, deleteBtn)
+		})
 
-	return tab
+		vbox := container.NewVBox(mobileChangeBtn, changeKindBtn)
+		tab := container.NewBorder(nil, vbox, nil, nil, lst)
+
+		return tab
+	} else {
+		vBox := container.NewVBox(nameEnt, kindBorder, addBtn, layout.NewSpacer(), changeBtn, changeKindBtn, layout.NewSpacer(), centeredFinishedCountLbl, layout.NewSpacer(), deleteBtn)
+		tab := container.NewHSplit(lst, vBox)
+		tab.Offset = MyApp.App.Preferences().Float("GlobalOffset")
+
+		return tab
+	}
+}
+
+func makeMobileChangePopUp(MyApp *logic.MyApp, nameEnt fyne.Widget, kindBorder *fyne.Container, addBtn fyne.Widget, changeBtn fyne.Widget, deleteBtn fyne.Widget) {
+	var changeAlphaPopUP *widget.PopUp
+
+	exitBtn := widget.NewButton("Exit", func() { changeAlphaPopUP.Hide() })
+
+	content := container.NewVBox(nameEnt, kindBorder, addBtn, changeBtn, layout.NewSpacer(), deleteBtn, layout.NewSpacer(), exitBtn)
+
+	changeAlphaPopUP = widget.NewModalPopUp(content, MyApp.Win.Canvas())
+	changeAlphaPopUP.Resize(fyne.NewSize(200, 0))
+	changeAlphaPopUP.Show()
 }
 
 func makeChangeKindPopUp(MyApp *logic.MyApp, ta TabAlpha, k *logic.Kind, tks *widget.Select) {

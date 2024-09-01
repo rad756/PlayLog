@@ -7,9 +7,10 @@ import (
 )
 
 type MyApp struct {
-	App  fyne.App
-	Win  fyne.Window
-	Tabs []Tab
+	App    fyne.App
+	Win    fyne.Window
+	Tabs   []Tab
+	Mobile bool
 }
 
 func Ini(MyApp *MyApp) {
@@ -22,6 +23,12 @@ func Ini(MyApp *MyApp) {
 	if MyApp.App.Preferences().Bool("FirstRun") {
 		CreateTabsFile(MyApp)
 		MyApp.App.Preferences().SetFloat("GlobalOffset", 0.6)
+	}
+
+	if MyApp.App.Driver().Device().IsMobile() {
+		MyApp.Mobile = true
+	} else {
+		MyApp.Mobile = false
 	}
 
 	GetTabs(MyApp)

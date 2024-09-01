@@ -87,6 +87,10 @@ func LoadMainUI(MyApp *logic.MyApp) {
 		content.Append(tabs[i])
 	}
 
+	if MyApp.Mobile {
+		content.SetTabLocation(container.TabLocationBottom)
+	}
+
 	MyApp.Win.SetContent(content)
 }
 

@@ -10,7 +10,6 @@ import (
 
 func main() {
 	MyApp := &logic.MyApp{App: app.New()}
-	MyApp.Win = MyApp.App.NewWindow("PlayLog")
 
 	if MyApp.App.Metadata().Release {
 		MyApp.App = app.NewWithID("com.github.rad756.playlog")
@@ -18,6 +17,7 @@ func main() {
 		MyApp.App = app.NewWithID("com.github.rad756.playlog.testing")
 	}
 
+	MyApp.Win = MyApp.App.NewWindow("PlayLog")
 	MyApp.Win.Resize(fyne.NewSize(600, 400))
 
 	logic.Ini(MyApp)
